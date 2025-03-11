@@ -1,5 +1,5 @@
-from crear_afn_basico import crear_afn_basico  # Importamos la función desde el archivo crear_afn_basico.py
 
+from crear_afn_basico import crear_afn_basico
 def menu():
     while True:
         print("\nMenu:")

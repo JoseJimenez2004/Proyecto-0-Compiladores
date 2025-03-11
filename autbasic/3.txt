@@ -1,0 +1,4 @@
+AFN con símbolo: c
+Estado inicial: 0
+Estado final: 1
+Transiciones: [(0, 'c', 1)]

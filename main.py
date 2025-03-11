@@ -1,5 +1,6 @@
-from crear_afn_basico import crear_afn_basico  # Importamos la función desde el archivo crear_afn_basico.py
-
+from afn import AFN
+from unir_afn import unir_afn
+from crear_afn_basico import crear_afn_basico
 def menu():
     while True:
         print("\nMenu:")
@@ -19,7 +20,12 @@ def menu():
             afn.mostrar()  # Mostramos el AFN creado
 
         elif opcion == "2":
-            print("Opción 2 seleccionada: Unir 2 AFN's")
+            simbolo1 = input("Ingrese símbolo para AFN 1: ")
+            simbolo2 = input("Ingrese símbolo para AFN 2: ")
+            afn1 = crear_afn_basico(simbolo1)
+            afn2 = crear_afn_basico(simbolo2)
+            afn_unido = unir_afn(afn1, afn2)
+            afn_unido.mostrar()
 
         elif opcion == "3":
             print("Opción 3 seleccionada: Concatenar 2 AFN's")

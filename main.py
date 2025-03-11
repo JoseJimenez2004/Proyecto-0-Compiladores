@@ -1,5 +1,4 @@
-from afn import AFN
-from unir_afn import unir_afn
+
 from crear_afn_basico import crear_afn_basico
 def menu():
     while True:

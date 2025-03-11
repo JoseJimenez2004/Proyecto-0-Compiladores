@@ -1,9 +1,4 @@
-#Puedes ingresar un carácter alfabético como "a", "b", "c", etc.
-
-#O puedes ingresar un símbolo especial, como "#", "*", "1", "@", etc.
-#Letras: Son los más comunes en AFNs. Ejemplos: a, b, c, etc.
-#Números: Puedes usar números como símbolos. Ejemplo: 1, 2, 3.
-#Símbolos especiales: Puedes usar caracteres como #, *, &, @ si lo necesitas.
+import os
 
 class AFN:
     def __init__(self, simbolo):
@@ -17,6 +12,19 @@ class AFN:
         print(f"Estado inicial: {self.estado_inicial}")
         print(f"Estado final: {self.estado_final}")
         print(f"Transiciones: {self.transiciones}")
+
+    def guardar_en_archivo(self, nombre_archivo):
+        # Verifica si la carpeta 'autbasic' existe, si no la crea
+        if not os.path.exists('autbasic'):
+            os.makedirs('autbasic')
+
+        # Abre el archivo en modo escritura
+        with open(f'autbasic/{nombre_archivo}.txt', 'w') as archivo:
+            archivo.write(f"AFN con símbolo: {self.simbolo}\n")
+            archivo.write(f"Estado inicial: {self.estado_inicial}\n")
+            archivo.write(f"Estado final: {self.estado_final}\n")
+            archivo.write(f"Transiciones: {self.transiciones}\n")
+            print(f"Autómata guardado en: autbasic/{nombre_archivo}.txt")
 
 def crear_afn_basico(simbolo):
     return AFN(simbolo)

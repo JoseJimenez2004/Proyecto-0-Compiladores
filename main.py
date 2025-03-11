@@ -1,5 +1,7 @@
-
 from crear_afn_basico import crear_afn_basico
+
+
+
 def menu():
     while True:
         print("\nMenu:")
@@ -17,6 +19,10 @@ def menu():
             simbolo = input("Ingrese el símbolo para el AFN Básico: ")
             afn = crear_afn_basico(simbolo)  # Llamamos a la función para crear el AFN
             afn.mostrar()  # Mostramos el AFN creado
+
+            # Guardamos el AFN en un archivo con un nombre único
+            nombre_archivo = input("Ingrese el nombre para el archivo de este AFN: ")
+            afn.guardar_en_archivo(nombre_archivo)  # Guardamos el AFN en un archivo
 
         elif opcion == "2":
             simbolo1 = input("Ingrese símbolo para AFN 1: ")

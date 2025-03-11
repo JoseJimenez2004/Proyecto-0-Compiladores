@@ -4,6 +4,10 @@ from afn_functions.concatenar_afn import concatenar_afn
 from afn_functions.cerradura_estrella import cerradura_estrella
 from afn_functions.cerradura_estrella_plus import cerradura_estrella_plus
 from afn_functions.opcional import opcional
+import sys
+sys.path.append("C:/Users/LENOVO/Documents/GitHub/Proyecto-0-Compiladores")
+
+
 
 def menu():
     while True:

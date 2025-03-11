@@ -1,5 +1,5 @@
-
 from crear_afn_basico import crear_afn_basico
+
 def menu():
     while True:
         print("\nMenu:")
@@ -18,13 +18,12 @@ def menu():
             afn = crear_afn_basico(simbolo)  # Llamamos a la función para crear el AFN
             afn.mostrar()  # Mostramos el AFN creado
 
+            # Guardamos el AFN en un archivo con un nombre único
+            nombre_archivo = input("Ingrese el nombre para el archivo de este AFN: ")
+            afn.guardar_en_archivo(nombre_archivo)  # Guardamos el AFN en un archivo
+
         elif opcion == "2":
-            simbolo1 = input("Ingrese símbolo para AFN 1: ")
-            simbolo2 = input("Ingrese símbolo para AFN 2: ")
-            afn1 = crear_afn_basico(simbolo1)
-            afn2 = crear_afn_basico(simbolo2)
-            afn_unido = unir_afn(afn1, afn2)
-            afn_unido.mostrar()
+            print("Opción 2 seleccionada: Unir 2 AFN's")
 
         elif opcion == "3":
             print("Opción 3 seleccionada: Concatenar 2 AFN's")

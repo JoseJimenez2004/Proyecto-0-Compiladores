@@ -1,13 +1,4 @@
-from afn_functions.crear_afn_basico import crear_afn_basico
-from afn_functions.unir_afn import unir_afn
-from afn_functions.concatenar_afn import concatenar_afn
-from afn_functions.cerradura_estrella import cerradura_estrella
-from afn_functions.cerradura_estrella_plus import cerradura_estrella_plus
-from afn_functions.opcional import opcional
-import sys
-sys.path.append("C:/Users/LENOVO/Documents/GitHub/Proyecto-0-Compiladores")
-
-
+from crear_afn_basico import crear_afn_basico  # Importamos la función desde el archivo crear_afn_basico.py
 
 def menu():
     while True:
@@ -24,35 +15,23 @@ def menu():
 
         if opcion == "1":
             simbolo = input("Ingrese el símbolo para el AFN Básico: ")
-            afn = crear_afn_basico(simbolo)
-            afn.mostrar()
+            afn = crear_afn_basico(simbolo)  # Llamamos a la función para crear el AFN
+            afn.mostrar()  # Mostramos el AFN creado
 
         elif opcion == "2":
-            afn1 = crear_afn_basico(input("Ingrese símbolo para AFN 1: "))
-            afn2 = crear_afn_basico(input("Ingrese símbolo para AFN 2: "))
-            afn = unir_afn(afn1, afn2)
-            afn.mostrar()
+            print("Opción 2 seleccionada: Unir 2 AFN's")
 
         elif opcion == "3":
-            afn1 = crear_afn_basico(input("Ingrese símbolo para AFN 1: "))
-            afn2 = crear_afn_basico(input("Ingrese símbolo para AFN 2: "))
-            afn = concatenar_afn(afn1, afn2)
-            afn.mostrar()
+            print("Opción 3 seleccionada: Concatenar 2 AFN's")
 
         elif opcion == "4":
-            afn = crear_afn_basico(input("Ingrese símbolo para el AFN: "))
-            afn_cerradura = cerradura_estrella(afn)
-            afn_cerradura.mostrar()
+            print("Opción 4 seleccionada: Cerradura * de un AFN")
 
         elif opcion == "5":
-            afn = crear_afn_basico(input("Ingrese símbolo para el AFN: "))
-            afn_cerradura_plus = cerradura_estrella_plus(afn)
-            afn_cerradura_plus.mostrar()
+            print("Opción 5 seleccionada: Cerradura + de un AFN")
 
         elif opcion == "6":
-            afn = crear_afn_basico(input("Ingrese símbolo para el AFN: "))
-            afn_opcional = opcional(afn)
-            afn_opcional.mostrar()
+            print("Opción 6 seleccionada: Opcionar ?")
 
         elif opcion == "7":
             print("Saliendo...")

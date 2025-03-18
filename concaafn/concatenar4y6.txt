@@ -1,0 +1,4 @@
+Simbolo: gf
+Estado inicial: 0
+Estado final: 1
+Transiciones: [(0, 'g', 1), (2, 'f', 3), (1, 'ε', 2)]

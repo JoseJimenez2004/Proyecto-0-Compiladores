@@ -1,0 +1,4 @@
+Simbolo: c* (Kleene)
+Estado inicial: 2
+Estado final: 3
+Transiciones: [(0, 'c', 1), (2, 'ε', 0), (1, 'ε', 3), (3, 'ε', 0), (2, 'ε', 3)]

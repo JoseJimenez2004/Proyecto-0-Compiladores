@@ -2,6 +2,7 @@ from crear_afn_basico import crear_afn_basico
 from unir_afn import unir_afn_desde_archivos
 from concatenar import concatenar_afn_desde_archivos
 from cerradurapositiva import cerradura_positiva_afn  
+from cerradurakleenestar import cerradura_kleene_afn
 def menu():
     while True:
         print("\nMenu:")
@@ -34,7 +35,7 @@ def menu():
             cerradura_positiva_afn()
 
         elif opcion == "5":
-            print("Opción 5 seleccionada: Cerradura * de un AFN")
+            cerradura_kleene_afn()
 
         elif opcion == "6":
             print("Opción 6 seleccionada: Opcionar ?")

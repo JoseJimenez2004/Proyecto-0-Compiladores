@@ -1,7 +1,7 @@
 from crear_afn_basico import crear_afn_basico
 from unir_afn import unir_afn_desde_archivos
 from concatenar import concatenar_afn_desde_archivos
-
+from cerradurapositiva import cerradura_positiva_afn  
 def menu():
     while True:
         print("\nMenu:")
@@ -25,13 +25,13 @@ def menu():
             afn.guardar_en_archivo(nombre_archivo)  # Guardamos el AFN en un archivo
 
         elif opcion == "2":
-            unir_afn_desde_archivos()  # Llamamos a la función para unir 2 AFNs
+            unir_afn_desde_archivos()  
 
         elif opcion == "3":
-            concatenar_afn_desde_archivos() # Llamamos a la función para unir 2 AFNs
+            concatenar_afn_desde_archivos() 
 
         elif opcion == "4":
-            print("Opción 4 seleccionada: Cerradura + de un AFN")
+            cerradura_positiva_afn()
 
         elif opcion == "5":
             print("Opción 5 seleccionada: Cerradura * de un AFN")

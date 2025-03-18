@@ -1,0 +1,4 @@
+Simbolo: f^+
+Estado inicial: 0
+Estado final: 2
+Transiciones: [(0, 'f', 1), (1, 'ε', 0), (2, 'ε', 0)]

@@ -8,8 +8,8 @@ def menu():
         print("1. Crear un AFN Básico")
         print("2. Unir 2 AFN's")
         print("3. Concatenar 2 AFN's")
-        print("4. Cerradura * de un AFN")
-        print("5. Cerradura + de un AFN")
+        print("4. Cerradura + de un AFN")
+        print("5. Cerradura * de un AFN")
         print("6. Opcionar ?")
         print("7. Salir")
 
@@ -31,10 +31,10 @@ def menu():
             concatenar_afn_desde_archivos() # Llamamos a la función para unir 2 AFNs
 
         elif opcion == "4":
-            print("Opción 4 seleccionada: Cerradura * de un AFN")
+            print("Opción 4 seleccionada: Cerradura + de un AFN")
 
         elif opcion == "5":
-            print("Opción 5 seleccionada: Cerradura + de un AFN")
+            print("Opción 5 seleccionada: Cerradura * de un AFN")
 
         elif opcion == "6":
             print("Opción 6 seleccionada: Opcionar ?")

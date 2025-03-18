@@ -1,0 +1,4 @@
+Simbolo: g? (Opcional)
+Estado inicial: 2
+Estado final: 3
+Transiciones: [(0, 'g', 1), (2, 'ε', 0), (1, 'ε', 3), (2, 'ε', 3)]

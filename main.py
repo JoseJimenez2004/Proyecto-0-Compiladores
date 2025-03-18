@@ -3,6 +3,7 @@ from unir_afn import unir_afn_desde_archivos
 from concatenar import concatenar_afn_desde_archivos
 from cerradurapositiva import cerradura_positiva_afn  
 from cerradurakleenestar import cerradura_kleene_afn
+from cerraduraopcional import cerradura_opcional_afn
 def menu():
     while True:
         print("\nMenu:")
@@ -38,7 +39,7 @@ def menu():
             cerradura_kleene_afn()
 
         elif opcion == "6":
-            print("Opción 6 seleccionada: Opcionar ?")
+            cerradura_opcional_afn()
 
         elif opcion == "7":
             print("Saliendo...")

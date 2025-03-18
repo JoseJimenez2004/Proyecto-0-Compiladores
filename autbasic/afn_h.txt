@@ -1,0 +1,4 @@
+AFN con símbolo: h
+Estado inicial: 0
+Estado final: 1
+Transiciones: [(0, 'h', 1)]

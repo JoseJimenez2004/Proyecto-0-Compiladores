@@ -1,4 +1,5 @@
 from crear_afn_basico import crear_afn_basico
+from unir_afn import unir_afn_desde_archivos  # Importamos la función para unir AFNs
 
 def menu():
     while True:
@@ -23,7 +24,7 @@ def menu():
             afn.guardar_en_archivo(nombre_archivo)  # Guardamos el AFN en un archivo
 
         elif opcion == "2":
-            print("Opción 2 seleccionada: Unir 2 AFN's")
+            unir_afn_desde_archivos()  # Llamamos a la función para unir 2 AFNs
 
         elif opcion == "3":
             print("Opción 3 seleccionada: Concatenar 2 AFN's")

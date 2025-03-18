@@ -1,0 +1,4 @@
+Simbolo: f|r
+Estado inicial: 2
+Estado final: 5
+Transiciones: [(0, 'f', 1), (3, 'r', 4), (2, 'ε', 0), (2, 'ε', 3), (1, 'ε', 5), (4, 'ε', 5)]

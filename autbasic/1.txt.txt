@@ -1,4 +1,0 @@
-AFN con símbolo: a
-Estado inicial: 0
-Estado final: 1
-Transiciones: [(0, 'a', 1)]

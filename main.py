@@ -4,6 +4,8 @@ from concatenar import concatenar_afn_desde_archivos
 from cerradurapositiva import cerradura_positiva_afn  
 from cerradurakleenestar import cerradura_kleene_afn
 from cerraduraopcional import cerradura_opcional_afn
+from analizador_lexico_opcion import analizador_lexico_opcion  # nueva importación
+
 def menu():
     while True:
         print("\nMenu:")
@@ -13,7 +15,8 @@ def menu():
         print("4. Cerradura + de un AFN")
         print("5. Cerradura * de un AFN")
         print("6. Opcionar ?")
-        print("7. Salir")
+        print("7. Analizador Léxico")  # nueva opción
+        print("8. Salir")
 
         opcion = input("Seleccione una opción: ")
 
@@ -21,20 +24,17 @@ def menu():
             crear_afn_basico()
         elif opcion == "2":
             unir_afn_desde_archivos()  
-
         elif opcion == "3":
             concatenar_afn_desde_archivos() 
-
         elif opcion == "4":
             cerradura_positiva_afn()
-
         elif opcion == "5":
             cerradura_kleene_afn()
-
         elif opcion == "6":
             cerradura_opcional_afn()
-
         elif opcion == "7":
+            analizador_lexico_opcion()
+        elif opcion == "8":
             print("Saliendo...")
             break
 

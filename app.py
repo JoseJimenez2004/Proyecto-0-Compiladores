@@ -6,6 +6,12 @@ from concatenar import concatenar_afn_desde_archivos
 from cerradurapositiva import cerradura_positiva_afn
 from cerradurakleenestar import cerradura_kleene_afn
 from cerraduraopcional import cerradura_opcional_afn
+from AnalizadorLexico import AnalizadorLexico
+from werkzeug.utils import secure_filename
+import os
+from concatenar import AFN, cargar_afn_desde_archivo  # importa tu lógica
+
+
 
 app = Flask(__name__)
 
@@ -54,5 +60,58 @@ def cerradura_opcional():
     cerradura_opcional_afn()
     return jsonify({'status': 'Cerradura opcional aplicada exitosamente'})
 
+@app.route('/analizador_lexico', methods=['POST'])
+def analizador_lexico():
+    data = request.json
+    cadena = data.get('cadena')
+    archivo_afd = "afd.txt"  # Asegúrate de tener este archivo generado previamente
+
+    if not cadena:
+        return jsonify({'error': 'Cadena no proporcionada'}), 400
+
+    analizador = AnalizadorLexico(cadena, archivo_afd)
+    tokens = []
+
+    while True:
+        token = analizador.yylex()
+        if token == 0:
+            break
+        tokens.append({
+            'lexema': analizador.Lexema,
+            'token': token
+        })
+
+    return jsonify({'tokens': tokens})
+
+UPLOAD_FOLDER = 'autbasic'
+RESULT_FOLDER = 'concaafn'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULT_FOLDER, exist_ok=True)
+
+@app.route('/concatenar_afns', methods=['POST'])
+def concatenar_afns():
+    afn1 = request.files['afn1']
+    afn2 = request.files['afn2']
+    nombre = request.form['nombre']
+
+    # Guardar los archivos subidos
+    nombre1 = secure_filename(afn1.filename)
+    nombre2 = secure_filename(afn2.filename)
+    afn1.save(os.path.join(UPLOAD_FOLDER, nombre1))
+    afn2.save(os.path.join(UPLOAD_FOLDER, nombre2))
+
+    # Cargar AFNs
+    afn1_obj = cargar_afn_desde_archivo(nombre1.replace('.txt', ''))
+    afn2_obj = cargar_afn_desde_archivo(nombre2.replace('.txt', ''))
+
+    # Renombrar estados de afn2
+    offset = max(afn1_obj.estado_final, afn2_obj.estado_final) + 1
+    trans2 = [(q1 + offset, s, q2 + offset) for (q1, s, q2) in afn2_obj.transiciones]
+    trans_total = afn1_obj.transiciones + trans2 + [(afn1_obj.estado_final, 'ε', afn2_obj.estado_inicial + offset)]
+
+    concatenado = AFN(f"{afn1_obj.simbolo}{afn2_obj.simbolo}", trans_total, afn1_obj.estado_inicial, afn2_obj.estado_final + offset)
+    concatenado.guardar_en_archivo(nombre, carpeta=RESULT_FOLDER)
+
+    return jsonify({'success': True})
 if __name__ == '__main__':
     app.run(debug=True)

@@ -200,3 +200,49 @@ footer {
 footer:hover {
     background-color: #0056b3;
 }
+
+/* Layout principal */
+.main-layout {
+    display: flex;
+    min-height: 70vh;
+    padding: 0 20px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #343a40;
+    padding: 20px;
+    border-radius: 12px;
+    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones del menú lateral */
+.menu-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Contenido a la derecha */
+.content {
+    flex-grow: 1;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}

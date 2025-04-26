@@ -11,88 +11,115 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <!-- Icono de la página -->
+    <!-- Icono -->
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2520/2520627.png" type="image/png" />
 </head>
 <body class="bg-light">
 
-    <!-- Barra de navegación -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">AFN Manager</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Documentación</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link active" href="#">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Documentación</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <div class="container text-center my-5">
-        <h1 class="display-4 text-primary">Crea y Gestiona tu AFN</h1>
-        <p class="lead text-muted">Genera autómatas finitos no deterministas de manera rápida y sencilla.</p>
-    </div>
+    <!-- Layout principal -->
+    <div class="main-layout d-flex">
+        <!-- Sidebar -->
+        <aside class="sidebar p-3 bg-white shadow-sm">
+            <button class="menu-btn btn btn-outline-primary w-100 mb-2" id="crearAFNBtn">Crear AFN Básico</button>
+            <button class="menu-btn btn btn-outline-primary w-100 mb-2" id="unirAFNBtn">Unir 2 AFN's</button>
+            <button class="menu-btn btn btn-outline-primary w-100 mb-2" id="concatenarAFNBtn">Concatenar 2 AFN's</button>
+            <button class="menu-btn btn btn-outline-primary w-100 mb-2" id="cerraduraPositivaBtn">Cerradura +</button>
+            <button class="menu-btn btn btn-outline-primary w-100 mb-2" id="cerraduraKleeneBtn">Cerradura *</button>
+            <button class="menu-btn btn btn-outline-primary w-100 mb-2" id="cerraduraOpcionalBtn">Cerradura ?</button>
+            <button class="menu-btn btn btn-success w-100 mt-4" id="analizadorLexicoBtn">Analizador Léxico</button>
+        </aside>
 
-    <!-- Botones de Acciones -->
-    <div class="container text-center mb-5">
-        <div class="row justify-content-center">
-            <div class="col-md-3 mb-3">
-                <button class="btn btn-lg btn-success" id="crearAFNBtn">Crear AFN Básico</button>
+        <!-- Contenido dinámico -->
+        <section class="content flex-grow-1 p-4">
+            <!-- Crear AFN -->
+            <div id="crearAFNForm" class="d-none">
+                <h2>Crear AFN Básico</h2>
+                <input type="text" id="simboloInput" class="form-control mb-3" placeholder="Introduce un símbolo">
+                <button class="btn btn-primary" id="guardarAFNBtn">Guardar AFN</button>
             </div>
-            <div class="col-md-3 mb-3">
-                <button class="btn btn-lg btn-warning" id="unirAFNBtn">Unir 2 AFN's</button>
+
+            <!-- Resultado AFN -->
+            <div id="resultadoAFN" class="d-none mt-4">
+                <h2>Detalles del AFN</h2>
+                <pre id="afnDetails" class="bg-dark text-white p-3 rounded"></pre>
             </div>
-            <div class="col-md-3 mb-3">
-                <button class="btn btn-lg btn-info" id="concatenarAFNBtn">Concatenar 2 AFN's</button>
-            </div>
-            <div class="col-md-3 mb-3">
-                <button class="btn btn-lg btn-dark" id="cerraduraPositivaBtn">Cerradura +</button>
-            </div>
-            <div class="col-md-3 mb-3">
-                <button class="btn btn-lg btn-warning" id="cerraduraKleeneBtn">Cerradura *</button>
-            </div>
-            <div class="col-md-3 mb-3">
-                <button class="btn btn-lg btn-dark" id="cerraduraOpcionalBtn">Cerradura ?</button>
-            </div>
+
+            <!-- Unir AFNs -->
+<div id="unirAFNForm" class="mt-4">
+    <h2>Unir 2 AFN's</h2>
+    <form id="form-unir-afns" class="card p-4 shadow-sm">
+        <div class="mb-3">
+            <label for="afn1" class="form-label">Seleccionar el primer AFN:</label>
+            <input type="file" id="afn1" name="afn1" accept=".txt" class="form-control">
         </div>
-    </div>
+        <div class="mb-3">
+            <label for="afn2" class="form-label">Seleccionar el segundo AFN:</label>
+            <input type="file" id="afn2" name="afn2" accept=".txt" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre del archivo resultante:</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Nombre del AFN unido" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Unir AFNs</button>
+    </form>
+</div>
 
-    <!-- Formularios y Resultados -->
-    <div id="crearAFNForm" class="container d-none">
-        <h2 class="text-center mb-4">Crear AFN Básico</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="simboloInput" class="form-label">Símbolo</label>
-                    <input type="text" class="form-control" id="simboloInput" placeholder="Introduce un símbolo" required>
+    <!-- Concatenar AFNs -->
+<div id="concatenarAFNForm" class="d-none mt-4">
+    <h2>Concatenar dos AFNs</h2>
+    <form id="form-concatenar-afns">
+        <div class="mb-3">
+            <label for="afn1Concat" class="form-label">Archivo del primer AFN:</label>
+            <input type="file" id="afn1Concat" name="afn1" class="form-control" accept=".txt">
+        </div>
+        <div class="mb-3">
+            <label for="afn2Concat" class="form-label">Archivo del segundo AFN:</label>
+            <input type="file" id="afn2Concat" name="afn2" class="form-control" accept=".txt">
+        </div>
+        <div class="mb-3">
+            <label for="nombreConcat" class="form-label">Nombre del nuevo AFN:</label>
+            <input type="text" id="nombreConcat" name="nombre" class="form-control" placeholder="Nombre del AFN concatenado">
+        </div>
+        <button type="submit" class="btn btn-primary">Concatenar AFNs</button>
+    </form>
+</div>
+
+            <!-- Analizador Léxico -->
+            <div id="analizadorLexicoForm" class="d-none mt-4">
+                <h2>Analizador Léxico</h2>
+                <input type="text" id="cadenaAnalizar" class="form-control mb-3" placeholder="Introduce la cadena a analizar">
+                <button class="btn btn-success" id="analizarCadenaBtn">Analizar</button>
+                <div id="resultadoLexico" class="mt-4 d-none">
+                    <h4>Tokens identificados:</h4>
+                    <pre id="lexicoResultado" class="bg-dark text-white p-3 rounded"></pre>
                 </div>
-                <button class="btn btn-primary w-100" id="guardarAFNBtn">Guardar AFN</button>
             </div>
-        </div>
-    </div>
-
-    <div id="resultadoAFN" class="container d-none">
-        <h2 class="text-center mb-4">Detalles del AFN</h2>
-        <pre id="afnDetails" class="bg-dark text-white p-3"></pre>
+        </section>
     </div>
 
     <!-- Footer -->
     <footer class="bg-primary text-white text-center py-3 mt-5">
-        <p>&copy; 2025 AFN Manager | Todos los derechos reservados</p>
+        <p>&copy; 2025 AFN Manager</p>
     </footer>
 
-    <!-- JavaScript -->
+    <!-- Bootstrap + JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-
 </html>

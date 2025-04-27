@@ -4,9 +4,10 @@ from crear_afn_basico import crear_afn_basico
 from unir_afn import unir_afn_desde_archivos
 from concatenar import concatenar_afn_desde_archivos, AFN, cargar_afn_desde_archivo
 from cerradurapositiva import cerradura_positiva_afn, aplicar_cerradura_positiva
-from cerradurakleenestar import cerradura_kleene_afn
-from cerraduraopcional import cerradura_opcional_afn
+from cerradurakleenestar import cerradura_kleene_afn, aplicar_cerradura_kleene
+from cerraduraopcional import cerradura_opcional_afn, aplicar_cerradura_opcional
 from AnalizadorLexico import AnalizadorLexico
+
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -17,7 +18,7 @@ def home():
 
 @app.route('/crear_afn', methods=['POST'])
 def crear_afn():
-    simbolo = request.json.get('simbolo')
+    simbolo = request.get_json().get('simbolo')
     if simbolo:
         # Crear el AFN con el símbolo
         afn = crear_afn_basico(simbolo)
@@ -48,8 +49,27 @@ def cerradura_positiva():
 
 @app.route('/cerradura_kleene', methods=['POST'])
 def cerradura_kleene():
-    cerradura_kleene_afn()
-    return jsonify({'status': 'Cerradura Kleene aplicada exitosamente'})
+    data = request.get_json()
+    nombre_afn = data.get('nombre')
+
+    if not nombre_afn:
+        return jsonify({"error": "No se ha proporcionado un AFN."}), 400
+
+    try:
+        # Cargar el AFN desde el archivo
+        afn = cargar_afn_desde_archivo(nombre_afn, carpeta='autbasic')
+        # Aplicar la cerradura de Kleene
+        afn_cerradura = aplicar_cerradura_kleene(afn)
+
+        # Guardar el nuevo AFN con la cerradura de Kleene
+        nombre_resultado = f"{nombre_afn}_cerradura_kleene"
+        afn_cerradura.guardar_en_archivo(nombre_resultado, carpeta='cerradurakleene')
+
+        mensaje = f"AFN con cerradura de Kleene guardado en: cerradurakleene/{nombre_resultado}.txt"
+        return jsonify({"mensaje": mensaje})
+
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
 
 @app.route('/cerradura_opcional', methods=['POST'])
 def cerradura_opcional():
@@ -58,26 +78,32 @@ def cerradura_opcional():
 
 @app.route('/analizador_lexico', methods=['POST'])
 def analizador_lexico():
-    data = request.json
+    data = request.get_json()
     cadena = data.get('cadena')
     archivo_afd = "afd.txt"  # Asegúrate de tener este archivo generado previamente
 
     if not cadena:
         return jsonify({'error': 'Cadena no proporcionada'}), 400
 
-    analizador = AnalizadorLexico(cadena, archivo_afd)
-    tokens = []
+    try:
+        analizador = AnalizadorLexico(cadena, archivo_afd)
+        tokens = []
 
-    while True:
-        token = analizador.yylex()
-        if token == 0:
-            break
-        tokens.append({
-            'lexema': analizador.Lexema,
-            'token': token
-        })
+        while True:
+            token = analizador.yylex()
+            if token == 0:
+                break
+            tokens.append({
+                'lexema': analizador.Lexema,
+                'token': token
+            })
 
-    return jsonify({'tokens': tokens})
+        return jsonify({'tokens': tokens})
+
+    except FileNotFoundError:
+        return jsonify({'error': f"Archivo {archivo_afd} no encontrado"}), 404
+    except Exception as e:
+        return jsonify({'error': f"Ocurrió un error: {str(e)}"}), 500
 
 UPLOAD_FOLDER = 'autbasic'
 RESULT_FOLDER = 'concaafn'
@@ -112,7 +138,7 @@ def concatenar_afns():
 
 @app.route('/cerradura_positiva_aplicar', methods=['POST'])
 def cerradura_positiva_aplicar():
-    nombre_afn = request.json.get('nombre')
+    nombre_afn = request.get_json().get('nombre')
     try:
         # Cargar el AFN desde el archivo
         afn = cargar_afn_desde_archivo(nombre_afn)
@@ -128,6 +154,22 @@ def cerradura_positiva_aplicar():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+def listar_afns():
+    return [f.replace('.txt', '') for f in os.listdir('autbasic') if f.endswith('.txt')]
+
+# Ruta para listar los AFNs disponibles
+@app.route('/listar_afns', methods=['GET'])
+def listar_afns_route():
+    afns = listar_afns()
+    return jsonify(afns)
+
+# Ruta para obtener los archivos AFNs disponibles
+@app.route('/obtener_afns', methods=['GET'])
+def obtener_afns():
+    carpeta_afns = 'autbasic'
+    archivos_afns = [f.replace('.txt', '') for f in os.listdir(carpeta_afns) if f.endswith('.txt')]
+    return jsonify({'afns': archivos_afns})
 
 if __name__ == '__main__':
     app.run(debug=True)

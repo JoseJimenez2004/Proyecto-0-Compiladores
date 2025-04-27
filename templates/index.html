@@ -105,8 +105,8 @@
                 <h2>Cerradura Positiva</h2>
                 <form id="form-cerradura-positiva">
                     <div class="mb-3">
-                        <label for="afn-select" class="form-label">Seleccionar AFN:</label>
-                        <select id="afn-select" class="form-control">
+                        <label for="afn-select-positiva" class="form-label">Seleccionar AFN:</label>
+                        <select id="afn-select-positiva" class="form-control">
                             <option value="">Seleccionar un AFN</option>
                             <!-- Aquí se cargarán los AFNs -->
                         </select>
@@ -114,6 +114,33 @@
                     <button type="submit" class="btn btn-primary">Aplicar Cerradura Positiva</button>
                 </form>
                 <div id="resultado" class="mt-3"></div>
+            </div>
+
+            <!-- Cerradura de Kleene -->
+            <div id="cerraduraKleeneForm" class="d-none">
+                <h2>Aplicar Cerradura de Kleene</h2>
+                <label for="afn-select-kleene">Selecciona un AFN:</label>
+                <select id="afn-select-kleene">
+                    <!-- Se llenará dinámicamente con los AFNs disponibles -->
+                </select>
+                <button id="aplicarCerraduraKleeneBtn">Aplicar Cerradura de Kleene</button>
+                <div id="resultadoCerraduraKleene"></div>
+            </div>
+
+            <!-- Cerradura Opcional -->
+            <div id="cerraduraOpcionalForm" class="d-none mt-4">
+                <h2>Cerradura Opcional</h2>
+                <form id="form-cerradura-opcional">
+                    <div class="mb-3">
+                        <label for="afn-select-opcional" class="form-label">Seleccionar AFN:</label>
+                        <select id="afn-select-opcional" class="form-control">
+                            <option value="">Seleccionar un AFN</option>
+                            <!-- Aquí se cargarán los AFNs -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Aplicar Cerradura Opcional</button>
+                </form>
+                <div id="resultadoCerraduraOpcional" class="mt-3"></div>
             </div>
 
             <!-- Analizador Léxico -->

@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const formCerraduraPositiva = document.getElementById('form-cerradura-positiva');
     const afnSelect = document.getElementById('afn-select');
     const resultadoDiv = document.getElementById('resultado');
+    const cerraduraKleeneForm = document.getElementById('cerraduraKleeneForm');
+    const aplicarCerraduraKleeneBtn = document.getElementById('aplicarCerraduraKleeneBtn');
+    const resultadoDivKleene = document.getElementById('resultadoCerraduraKleene');
 
     // Mostrar formularios
     crearAFNBtn.addEventListener('click', function () {
@@ -48,12 +51,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     cerraduraKleeneBtn.addEventListener('click', function () {
         resetarVisibilidad();
-        alert("Función de cerradura Kleene (*) aún no implementada.");
+        cerraduraKleeneForm.classList.remove('d-none');
     });
 
     cerraduraOpcionalBtn.addEventListener('click', function () {
         resetarVisibilidad();
-        alert("Función de cerradura opcional (?) aún no implementada.");
+        cerraduraOpcionalForm.classList.remove('d-none');
     });
 
     analizadorLexicoBtn.addEventListener('click', function () {
@@ -180,6 +183,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Aplicar cerradura de Kleene
+    aplicarCerraduraKleeneBtn.addEventListener('click', function () {
+        const nombre = afnSelect.value;
+        if (!nombre) {
+            alert("Por favor, selecciona un AFN.");
+            return;
+        }
+
+        $.ajax({
+            url: "/cerradura_kleene",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ nombre: nombre }),
+            success: function(response) {
+                resultadoDivKleene.textContent = response.mensaje;
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.error || "Error desconocido.";
+                resultadoDivKleene.textContent = "Error: " + errorMsg;
+            }
+        });
+    });
+
     // Ocultar todos los formularios
     function resetarVisibilidad() {
         crearAFNForm.classList.add('d-none');
@@ -189,6 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
         unirAFNForm.classList.add('d-none');
         concatenarAFNForm.classList.add('d-none');
         cerraduraPositivaForm.classList.add('d-none');
+        cerraduraKleeneForm.classList.add('d-none');
     }
 
     // Listar AFNs para Cerradura Positiva
@@ -197,29 +224,52 @@ document.addEventListener("DOMContentLoaded", function () {
             afnSelect.append(new Option(nombre, nombre));
         });
     });
+});
 
-    // Enviar formulario para aplicar cerradura positiva
-    formCerraduraPositiva.addEventListener('submit', function (event) {
-        event.preventDefault();
+// Manejar la opción de cerradura opcional
+document.getElementById('cerraduraOpcionalBtn').addEventListener('click', function() {
+    document.getElementById('cerraduraOpcionalForm').classList.toggle('d-none');
+});
 
-        const nombre = afnSelect.value;
-        if (!nombre) {
-            alert("Por favor, selecciona un AFN.");
-            return;
-        }
+// Cargar los AFNs disponibles para aplicar la cerradura opcional
+function cargarAFNsDisponibles() {
+    fetch('/obtener_afns')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('afn-select-opcional');
+            select.innerHTML = '<option value="">Seleccionar un AFN</option>';  // Limpiar opciones
+            data.afns.forEach(afn => {
+                const option = document.createElement('option');
+                option.value = afn;
+                option.textContent = afn;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar los AFNs:', error));
+}
 
-        $.ajax({
-            url: "/cerradura_positiva",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({ nombre: nombre }),
-            success: function(response) {
-                resultadoDiv.textContent = response.mensaje;
-            },
-            error: function(xhr) {
-                const errorMsg = xhr.responseJSON?.error || "Error desconocido.";
-                resultadoDiv.textContent = "Error: " + errorMsg;
-            }
-        });
+// Al cargar la página, obtener los AFNs disponibles
+document.addEventListener('DOMContentLoaded', cargarAFNsDisponibles);
+
+// Enviar el formulario para aplicar la cerradura opcional
+document.getElementById('form-cerradura-opcional').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const afnSeleccionado = document.getElementById('afn-select-opcional').value;
+    
+    if (!afnSeleccionado) {
+        alert('Selecciona un AFN para aplicar la cerradura opcional.');
+        return;
+    }
+
+    fetch(`/cerradura_opcional/${afnSeleccionado}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('resultadoCerraduraOpcional').innerHTML = `<p>${data.mensaje}</p>`;
+    })
+    .catch(error => {
+        console.error('Error al aplicar la cerradura opcional:', error);
     });
 });

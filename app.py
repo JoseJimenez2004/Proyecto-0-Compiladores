@@ -2,16 +2,12 @@ import os
 from flask import Flask, render_template, jsonify, request
 from crear_afn_basico import crear_afn_basico
 from unir_afn import unir_afn_desde_archivos
-from concatenar import concatenar_afn_desde_archivos
-from cerradurapositiva import cerradura_positiva_afn
+from concatenar import concatenar_afn_desde_archivos, AFN, cargar_afn_desde_archivo
+from cerradurapositiva import cerradura_positiva_afn, aplicar_cerradura_positiva
 from cerradurakleenestar import cerradura_kleene_afn
 from cerraduraopcional import cerradura_opcional_afn
 from AnalizadorLexico import AnalizadorLexico
 from werkzeug.utils import secure_filename
-import os
-from concatenar import AFN, cargar_afn_desde_archivo  # importa tu lógica
-
-
 
 app = Flask(__name__)
 
@@ -113,5 +109,25 @@ def concatenar_afns():
     concatenado.guardar_en_archivo(nombre, carpeta=RESULT_FOLDER)
 
     return jsonify({'success': True})
+
+@app.route('/cerradura_positiva_aplicar', methods=['POST'])
+def cerradura_positiva_aplicar():
+    nombre_afn = request.json.get('nombre')
+    try:
+        # Cargar el AFN desde el archivo
+        afn = cargar_afn_desde_archivo(nombre_afn)
+
+        # Aplicar la cerradura positiva
+        afn_resultado = aplicar_cerradura_positiva(afn)
+        
+        # Guardar el resultado
+        nombre_resultado = f"{nombre_afn}_cerradura_positiva"
+        afn_resultado.guardar_en_archivo(nombre_resultado, carpeta='cerradurapositiva')
+        
+        return jsonify({"mensaje": f"Guardado como cerradurapositiva/{nombre_resultado}.txt"})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 if __name__ == '__main__':
     app.run(debug=True)

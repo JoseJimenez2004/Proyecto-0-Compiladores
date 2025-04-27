@@ -20,8 +20,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const unirAFNForm = document.getElementById('form-unir-afns');
     const concatenarAFNForm = document.getElementById('concatenarAFNForm');
     const formConcatenarAFNs = document.getElementById('form-concatenar-afns');
+    const cerraduraPositivaForm = document.getElementById('cerraduraPositivaForm');
+    const formCerraduraPositiva = document.getElementById('form-cerradura-positiva');
+    const afnSelect = document.getElementById('afn-select');
+    const resultadoDiv = document.getElementById('resultado');
 
-    // Mostrar formulario para crear AFN
+    // Mostrar formularios
     crearAFNBtn.addEventListener('click', function () {
         resetarVisibilidad();
         crearAFNForm.classList.remove('d-none');
@@ -39,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     cerraduraPositivaBtn.addEventListener('click', function () {
         resetarVisibilidad();
-        alert("Función de cerradura positiva aún no implementada.");
+        cerraduraPositivaForm.classList.remove('d-none');
     });
 
     cerraduraKleeneBtn.addEventListener('click', function () {
@@ -52,6 +56,12 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Función de cerradura opcional (?) aún no implementada.");
     });
 
+    analizadorLexicoBtn.addEventListener('click', function () {
+        resetarVisibilidad();
+        analizadorLexicoForm.classList.remove('d-none');
+    });
+
+    // Función para guardar AFN
     guardarAFNBtn.addEventListener('click', function () {
         const simbolo = document.getElementById('simboloInput').value;
 
@@ -72,11 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error('Error:', error));
     });
 
-    analizadorLexicoBtn.addEventListener('click', function () {
-        resetarVisibilidad();
-        analizadorLexicoForm.classList.remove('d-none');
-    });
-
+    // Función para analizar cadena
     analizarCadenaBtn.addEventListener('click', function () {
         const cadena = cadenaAnalizar.value;
 
@@ -102,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Enviar formulario de unir AFNs
+    // Enviar formulario para unir AFNs
     unirAFNForm.addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -138,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Enviar formulario de concatenar AFNs
+    // Enviar formulario para concatenar AFNs
     formConcatenarAFNs.addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -182,5 +188,38 @@ document.addEventListener("DOMContentLoaded", function () {
         resultadoLexico.classList.add('d-none');
         unirAFNForm.classList.add('d-none');
         concatenarAFNForm.classList.add('d-none');
+        cerraduraPositivaForm.classList.add('d-none');
     }
+
+    // Listar AFNs para Cerradura Positiva
+    $.get("/listar_afns", function(data) {
+        data.forEach(nombre => {
+            afnSelect.append(new Option(nombre, nombre));
+        });
+    });
+
+    // Enviar formulario para aplicar cerradura positiva
+    formCerraduraPositiva.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const nombre = afnSelect.value;
+        if (!nombre) {
+            alert("Por favor, selecciona un AFN.");
+            return;
+        }
+
+        $.ajax({
+            url: "/cerradura_positiva",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ nombre: nombre }),
+            success: function(response) {
+                resultadoDiv.textContent = response.mensaje;
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.error || "Error desconocido.";
+                resultadoDiv.textContent = "Error: " + errorMsg;
+            }
+        });
+    });
 });

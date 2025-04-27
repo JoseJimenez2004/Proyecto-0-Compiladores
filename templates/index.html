@@ -61,44 +61,60 @@
             </div>
 
             <!-- Unir AFNs -->
-<div id="unirAFNForm" class="mt-4">
-    <h2>Unir 2 AFN's</h2>
-    <form id="form-unir-afns" class="card p-4 shadow-sm">
-        <div class="mb-3">
-            <label for="afn1" class="form-label">Seleccionar el primer AFN:</label>
-            <input type="file" id="afn1" name="afn1" accept=".txt" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label for="afn2" class="form-label">Seleccionar el segundo AFN:</label>
-            <input type="file" id="afn2" name="afn2" accept=".txt" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre del archivo resultante:</label>
-            <input type="text" id="nombre" name="nombre" placeholder="Nombre del AFN unido" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-primary">Unir AFNs</button>
-    </form>
-</div>
+            <div id="unirAFNForm" class="d-none mt-4">
+                <h2>Unir 2 AFN's</h2>
+                <form id="form-unir-afns" class="card p-4 shadow-sm">
+                    <div class="mb-3">
+                        <label for="afn1" class="form-label">Seleccionar el primer AFN:</label>
+                        <input type="file" id="afn1" name="afn1" accept=".txt" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="afn2" class="form-label">Seleccionar el segundo AFN:</label>
+                        <input type="file" id="afn2" name="afn2" accept=".txt" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del archivo resultante:</label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre del AFN unido" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Unir AFNs</button>
+                </form>
+            </div>
 
-    <!-- Concatenar AFNs -->
-<div id="concatenarAFNForm" class="d-none mt-4">
-    <h2>Concatenar dos AFNs</h2>
-    <form id="form-concatenar-afns">
-        <div class="mb-3">
-            <label for="afn1Concat" class="form-label">Archivo del primer AFN:</label>
-            <input type="file" id="afn1Concat" name="afn1" class="form-control" accept=".txt">
-        </div>
-        <div class="mb-3">
-            <label for="afn2Concat" class="form-label">Archivo del segundo AFN:</label>
-            <input type="file" id="afn2Concat" name="afn2" class="form-control" accept=".txt">
-        </div>
-        <div class="mb-3">
-            <label for="nombreConcat" class="form-label">Nombre del nuevo AFN:</label>
-            <input type="text" id="nombreConcat" name="nombre" class="form-control" placeholder="Nombre del AFN concatenado">
-        </div>
-        <button type="submit" class="btn btn-primary">Concatenar AFNs</button>
-    </form>
-</div>
+            <!-- Concatenar AFNs -->
+            <div id="concatenarAFNForm" class="d-none mt-4">
+                <h2>Concatenar dos AFNs</h2>
+                <form id="form-concatenar-afns">
+                    <div class="mb-3">
+                        <label for="afn1Concat" class="form-label">Archivo del primer AFN:</label>
+                        <input type="file" id="afn1Concat" name="afn1" class="form-control" accept=".txt">
+                    </div>
+                    <div class="mb-3">
+                        <label for="afn2Concat" class="form-label">Archivo del segundo AFN:</label>
+                        <input type="file" id="afn2Concat" name="afn2" class="form-control" accept=".txt">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombreConcat" class="form-label">Nombre del nuevo AFN:</label>
+                        <input type="text" id="nombreConcat" name="nombre" class="form-control" placeholder="Nombre del AFN concatenado">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Concatenar AFNs</button>
+                </form>
+            </div>
+
+            <!-- Cerradura Positiva -->
+            <div id="cerraduraPositivaForm" class="d-none mt-4">
+                <h2>Cerradura Positiva</h2>
+                <form id="form-cerradura-positiva">
+                    <div class="mb-3">
+                        <label for="afn-select" class="form-label">Seleccionar AFN:</label>
+                        <select id="afn-select" class="form-control">
+                            <option value="">Seleccionar un AFN</option>
+                            <!-- Aquí se cargarán los AFNs -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Aplicar Cerradura Positiva</button>
+                </form>
+                <div id="resultado" class="mt-3"></div>
+            </div>
 
             <!-- Analizador Léxico -->
             <div id="analizadorLexicoForm" class="d-none mt-4">

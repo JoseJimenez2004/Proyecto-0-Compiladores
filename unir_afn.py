@@ -8,21 +8,19 @@ class AFN:
         self.estado_final = estado_final
     
     def guardar_en_archivo(self, nombre_archivo, carpeta='unirafn'):
-        # Crear la carpeta si no existe
         if not os.path.exists(carpeta):
             os.makedirs(carpeta)
         
         ruta = f'{carpeta}/{nombre_archivo}.txt'
         
-        # Usar codificación UTF-8 para evitar problemas con caracteres especiales
         with open(ruta, 'w', encoding='utf-8') as archivo:
             archivo.write(f"Simbolo: {self.simbolo}\n")
             archivo.write(f"Estado inicial: {self.estado_inicial}\n")
             archivo.write(f"Estado final: {self.estado_final}\n")
             archivo.write(f"Transiciones: {self.transiciones}\n")
 
-def cargar_afn_desde_archivo(nombre_archivo):
-    ruta = f'autbasic/{nombre_archivo}.txt'
+def cargar_afn_desde_archivo(nombre_archivo, carpeta='autbasic'):
+    ruta = f'{carpeta}/{nombre_archivo}.txt'
     if not os.path.exists(ruta):
         raise FileNotFoundError(f"El archivo {ruta} no existe.")
     
@@ -34,17 +32,12 @@ def cargar_afn_desde_archivo(nombre_archivo):
     estado_final = int(lineas[2].strip().split(': ')[1])
     transiciones = eval(lineas[3].strip().split(': ')[1])  # Convierte la cadena en lista de tuplas
     
-    # Asegúrate de que el objeto AFN se inicialice correctamente
     afn = AFN(simbolo, transiciones, estado_inicial, estado_final)
     return afn
 
-def unir_afn_desde_archivos():
+def unir_afn_desde_archivos(nombre_afn1, nombre_afn2, nombre_resultado):
     if not os.path.exists('unirafn'):
         os.makedirs('unirafn')
-    
-    nombre_afn1 = input("Ingrese el nombre del primer AFN (sin .txt): ")
-    nombre_afn2 = input("Ingrese el nombre del segundo AFN (sin .txt): ")
-    nombre_resultado = input("Ingrese el nombre del AFN resultante (sin .txt): ")
     
     afn1 = cargar_afn_desde_archivo(nombre_afn1)
     afn2 = cargar_afn_desde_archivo(nombre_afn2)
@@ -69,7 +62,4 @@ def unir_afn_desde_archivos():
     # Guardar el AFN unido en un archivo
     afn_unido.guardar_en_archivo(nombre_resultado, carpeta='unirafn')
     
-    print(f"AFN unido guardado en: unirafn/{nombre_resultado}.txt")
-
-if __name__ == "__main__":
-    unir_afn_desde_archivos()
+    return nombre_resultado  # Esto puede ser útil para devolver el nombre del archivo guardado

@@ -1,0 +1,4 @@
+AFN con símbolo: omar
+Estado inicial: 0
+Estado final: 1
+Transiciones: [(0, 'omar', 1)]

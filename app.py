@@ -7,10 +7,14 @@ from cerradurapositiva import cerradura_positiva_afn, aplicar_cerradura_positiva
 from cerradurakleenestar import cerradura_kleene_afn, aplicar_cerradura_kleene
 from cerraduraopcional import cerradura_opcional_afn, aplicar_cerradura_opcional
 from AnalizadorLexico import AnalizadorLexico
-
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+
+UPLOAD_FOLDER = 'autbasic'
+RESULT_FOLDER = 'concaafn'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULT_FOLDER, exist_ok=True)
 
 @app.route('/')
 def home():
@@ -39,10 +43,28 @@ def crear_afn():
     else:
         return jsonify({'error': 'Símbolo no proporcionado'}), 400
 
-@app.route('/unir_afn', methods=['POST'])
-def unir_afn():
-    unir_afn_desde_archivos()
-    return jsonify({'status': 'AFN unido exitosamente'})
+@app.route('/unir_afns', methods=['POST'])
+def unir_afns():
+    try:
+        afn1 = request.files['afn1']
+        afn2 = request.files['afn2']
+        nombre_resultado = request.form['resultado']
+
+        if not afn1 or not afn2 or not nombre_resultado:
+            return jsonify({'error': 'Faltan parámetros'}), 400
+
+        # Guardar los archivos
+        nombre1 = secure_filename(afn1.filename)
+        nombre2 = secure_filename(afn2.filename)
+        afn1.save(os.path.join(UPLOAD_FOLDER, nombre1))
+        afn2.save(os.path.join(UPLOAD_FOLDER, nombre2))
+
+        # Llamar a la función de unir AFNs
+        archivo_guardado = unir_afn_desde_archivos(nombre1.replace('.txt', ''), nombre2.replace('.txt', ''), nombre_resultado)
+        return jsonify({'mensaje': f'AFNs unidos exitosamente, archivo guardado como {archivo_guardado}.txt'})
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/concatenar_afn', methods=['POST'])
 def concatenar_afn():
@@ -112,11 +134,6 @@ def analizador_lexico():
     except Exception as e:
         return jsonify({'error': f"Ocurrió un error: {str(e)}"}), 500
 
-UPLOAD_FOLDER = 'autbasic'
-RESULT_FOLDER = 'concaafn'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(RESULT_FOLDER, exist_ok=True)
-
 @app.route('/concatenar_afns', methods=['POST'])
 def concatenar_afns():
     afn1 = request.files['afn1']
@@ -157,7 +174,7 @@ def cerradura_positiva_aplicar():
         nombre_resultado = f"{nombre_afn}_cerradura_positiva"
         afn_resultado.guardar_en_archivo(nombre_resultado, carpeta='cerradurapositiva')
         
-        return jsonify({"mensaje": f"Guardado como cerradurapositiva/{nombre_resultado}.txt"})
+        return jsonify({"mensaje": f"Guardado como cerradurapositiva/{nombre_resultado}.txt"}), 200
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -165,20 +182,16 @@ def cerradura_positiva_aplicar():
 def listar_afns():
     return [f.replace('.txt', '') for f in os.listdir('autbasic') if f.endswith('.txt')]
 
-# Ruta para listar los AFNs disponibles
 @app.route('/listar_afns', methods=['GET'])
 def listar_afns_route():
     afns = listar_afns()
     return jsonify(afns)
 
-# Ruta para obtener los archivos AFNs disponibles
 @app.route('/obtener_afns', methods=['GET'])
 def obtener_afns():
     carpeta_afns = 'autbasic'
     archivos_afns = [f.replace('.txt', '') for f in os.listdir(carpeta_afns) if f.endswith('.txt')]
     return jsonify({'afns': archivos_afns})
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

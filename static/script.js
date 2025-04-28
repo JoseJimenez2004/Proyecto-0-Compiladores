@@ -1,34 +1,71 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Botones y formularios
     const crearAFNBtn = document.getElementById('crearAFNBtn');
     const unirAFNBtn = document.getElementById('unirAFNBtn');
     const concatenarAFNBtn = document.getElementById('concatenarAFNBtn');
     const cerraduraPositivaBtn = document.getElementById('cerraduraPositivaBtn');
     const cerraduraKleeneBtn = document.getElementById('cerraduraKleeneBtn');
     const cerraduraOpcionalBtn = document.getElementById('cerraduraOpcionalBtn');
+    const analizadorLexicoBtn = document.getElementById('analizadorLexicoBtn');
     const guardarAFNBtn = document.getElementById('guardarAFNBtn');
+    const analizarCadenaBtn = document.getElementById('analizarCadenaBtn');
+    
     const crearAFNForm = document.getElementById('crearAFNForm');
+    const unirAFNForm = document.getElementById('unirAFNForm');
+    const concatenarAFNForm = document.getElementById('concatenarAFNForm');
+    const cerraduraPositivaForm = document.getElementById('cerraduraPositivaForm');
+    const cerraduraKleeneForm = document.getElementById('cerraduraKleeneForm');
+    const cerraduraOpcionalForm = document.getElementById('cerraduraOpcionalForm');
+    const analizadorLexicoForm = document.getElementById('analizadorLexicoForm');
+
     const resultadoAFN = document.getElementById('resultadoAFN');
+    const resultadoLexico = document.getElementById('resultadoLexico');
+
+    const afnSelect = document.getElementById('afn-select');
+    const resultadoDivKleene = document.getElementById('resultadoCerraduraKleene');
+    const lexicoResultado = document.getElementById('lexicoResultado');
     const afnDetails = document.getElementById('afnDetails');
 
-    const analizadorLexicoBtn = document.getElementById('analizadorLexicoBtn');
-    const analizadorLexicoForm = document.getElementById('analizadorLexicoForm');
-    const analizarCadenaBtn = document.getElementById('analizarCadenaBtn');
-    const cadenaAnalizar = document.getElementById('cadenaAnalizar');
-    const resultadoLexico = document.getElementById('resultadoLexico');
-    const lexicoResultado = document.getElementById('lexicoResultado');
+    // Función para ocultar todos los formularios
+    function resetarVisibilidad() {
+        const formularios = [
+            crearAFNForm, unirAFNForm, concatenarAFNForm,
+            cerraduraPositivaForm, cerraduraKleeneForm, cerraduraOpcionalForm,
+            analizadorLexicoForm, resultadoAFN, resultadoLexico
+        ];
+        formularios.forEach(form => form.classList.add('d-none'));
+    }
 
-    const unirAFNForm = document.getElementById('form-unir-afns');
-    const concatenarAFNForm = document.getElementById('concatenarAFNForm');
-    const formConcatenarAFNs = document.getElementById('form-concatenar-afns');
-    const cerraduraPositivaForm = document.getElementById('cerraduraPositivaForm');
-    const formCerraduraPositiva = document.getElementById('form-cerradura-positiva');
-    const afnSelect = document.getElementById('afn-select');
-    const resultadoDiv = document.getElementById('resultado');
-    const cerraduraKleeneForm = document.getElementById('cerraduraKleeneForm');
-    const aplicarCerraduraKleeneBtn = document.getElementById('aplicarCerraduraKleeneBtn');
-    const resultadoDivKleene = document.getElementById('resultadoCerraduraKleene');
+    // Cargar opciones de AFNs
+    function cargarAFNsDisponibles() {
+        fetch('/obtener_afns')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('afn-select-opcional');
+                select.innerHTML = '<option value="">Seleccionar un AFN</option>';
+                data.afns.forEach(afn => {
+                    const option = document.createElement('option');
+                    option.value = afn;
+                    option.textContent = afn;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error al cargar AFNs:', error));
+    }
 
-    // Mostrar formularios
+    // Cargar lista de AFNs para cerradura Kleene
+    function cargarAFNsParaCerradura() {
+        fetch("/listar_afns")
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(nombre => {
+                    afnSelect.append(new Option(nombre, nombre));
+                });
+            })
+            .catch(error => console.error('Error al cargar lista de AFNs:', error));
+    }
+
+    // Botones de menú
     crearAFNBtn.addEventListener('click', function () {
         resetarVisibilidad();
         crearAFNForm.classList.remove('d-none');
@@ -64,9 +101,13 @@ document.addEventListener("DOMContentLoaded", function () {
         analizadorLexicoForm.classList.remove('d-none');
     });
 
-    // Función para guardar AFN
+    // Guardar nuevo AFN
     guardarAFNBtn.addEventListener('click', function () {
         const simbolo = document.getElementById('simboloInput').value;
+        if (!simbolo) {
+            alert('Introduce un símbolo.');
+            return;
+        }
 
         fetch('/crear_afn', {
             method: 'POST',
@@ -85,9 +126,13 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error('Error:', error));
     });
 
-    // Función para analizar cadena
+    // Analizar cadena
     analizarCadenaBtn.addEventListener('click', function () {
-        const cadena = cadenaAnalizar.value;
+        const cadena = document.getElementById('cadenaAnalizar').value;
+        if (!cadena) {
+            alert('Introduce una cadena.');
+            return;
+        }
 
         fetch('/analizador_lexico', {
             method: 'POST',
@@ -111,16 +156,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Enviar formulario para unir AFNs
-    unirAFNForm.addEventListener('submit', function (event) {
+    // Unir AFNs
+    document.getElementById('form-unir-afns').addEventListener('submit', function (event) {
         event.preventDefault();
-
         const afn1 = document.getElementById('afn1').files[0];
         const afn2 = document.getElementById('afn2').files[0];
         const nombre = document.getElementById('nombre').value;
 
         if (!afn1 || !afn2 || !nombre) {
-            alert('Por favor, completa todos los campos.');
+            alert('Completa todos los campos.');
             return;
         }
 
@@ -136,21 +180,20 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('AFNs unidos exitosamente!');
+                alert('¡AFNs unidos exitosamente!');
             } else {
-                alert('Hubo un error al unir los AFNs.');
+                alert('Error al unir AFNs.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error de conexión. Por favor, inténtalo de nuevo más tarde.');
+            alert('Error de conexión.');
         });
     });
 
-    // Enviar formulario para concatenar AFNs
-    formConcatenarAFNs.addEventListener('submit', function (event) {
+    // Concatenar AFNs
+    document.getElementById('form-concatenar-afns').addEventListener('submit', function (event) {
         event.preventDefault();
-
         const afn1 = document.getElementById('afn1Concat').files[0];
         const afn2 = document.getElementById('afn2Concat').files[0];
         const nombre = document.getElementById('nombreConcat').value;
@@ -172,104 +215,62 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('¡AFNs concatenados correctamente!');
+                alert('¡AFNs concatenados exitosamente!');
             } else {
-                alert('Hubo un error en la concatenación.');
+                alert('Error al concatenar AFNs.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error de conexión al servidor.');
+            alert('Error de conexión.');
         });
     });
 
     // Aplicar cerradura de Kleene
-    aplicarCerraduraKleeneBtn.addEventListener('click', function () {
+    document.getElementById('aplicarCerraduraKleeneBtn').addEventListener('click', function () {
         const nombre = afnSelect.value;
         if (!nombre) {
-            alert("Por favor, selecciona un AFN.");
+            alert("Selecciona un AFN.");
             return;
         }
 
-        $.ajax({
-            url: "/cerradura_kleene",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({ nombre: nombre }),
-            success: function(response) {
-                resultadoDivKleene.textContent = response.mensaje;
-            },
-            error: function(xhr) {
-                const errorMsg = xhr.responseJSON?.error || "Error desconocido.";
-                resultadoDivKleene.textContent = "Error: " + errorMsg;
-            }
-        });
-    });
-
-    // Ocultar todos los formularios
-    function resetarVisibilidad() {
-        crearAFNForm.classList.add('d-none');
-        resultadoAFN.classList.add('d-none');
-        analizadorLexicoForm.classList.add('d-none');
-        resultadoLexico.classList.add('d-none');
-        unirAFNForm.classList.add('d-none');
-        concatenarAFNForm.classList.add('d-none');
-        cerraduraPositivaForm.classList.add('d-none');
-        cerraduraKleeneForm.classList.add('d-none');
-    }
-
-    // Listar AFNs para Cerradura Positiva
-    $.get("/listar_afns", function(data) {
-        data.forEach(nombre => {
-            afnSelect.append(new Option(nombre, nombre));
-        });
-    });
-});
-
-// Manejar la opción de cerradura opcional
-document.getElementById('cerraduraOpcionalBtn').addEventListener('click', function() {
-    document.getElementById('cerraduraOpcionalForm').classList.toggle('d-none');
-});
-
-// Cargar los AFNs disponibles para aplicar la cerradura opcional
-function cargarAFNsDisponibles() {
-    fetch('/obtener_afns')
+        fetch('/cerradura_kleene', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre: nombre })
+        })
         .then(response => response.json())
         .then(data => {
-            const select = document.getElementById('afn-select-opcional');
-            select.innerHTML = '<option value="">Seleccionar un AFN</option>';  // Limpiar opciones
-            data.afns.forEach(afn => {
-                const option = document.createElement('option');
-                option.value = afn;
-                option.textContent = afn;
-                select.appendChild(option);
-            });
+            resultadoDivKleene.textContent = data.mensaje || 'Operación realizada.';
         })
-        .catch(error => console.error('Error al cargar los AFNs:', error));
-}
-
-// Al cargar la página, obtener los AFNs disponibles
-document.addEventListener('DOMContentLoaded', cargarAFNsDisponibles);
-
-// Enviar el formulario para aplicar la cerradura opcional
-document.getElementById('form-cerradura-opcional').addEventListener('submit', function(event) {
-    event.preventDefault();
-    
-    const afnSeleccionado = document.getElementById('afn-select-opcional').value;
-    
-    if (!afnSeleccionado) {
-        alert('Selecciona un AFN para aplicar la cerradura opcional.');
-        return;
-    }
-
-    fetch(`/cerradura_opcional/${afnSeleccionado}`, {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('resultadoCerraduraOpcional').innerHTML = `<p>${data.mensaje}</p>`;
-    })
-    .catch(error => {
-        console.error('Error al aplicar la cerradura opcional:', error);
+        .catch(error => {
+            console.error('Error:', error);
+            resultadoDivKleene.textContent = "Error en la operación.";
+        });
     });
+
+    // Aplicar cerradura opcional
+    document.getElementById('form-cerradura-opcional').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const afnSeleccionado = document.getElementById('afn-select-opcional').value;
+        if (!afnSeleccionado) {
+            alert('Selecciona un AFN.');
+            return;
+        }
+
+        fetch(`/cerradura_opcional/${afnSeleccionado}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('resultadoCerraduraOpcional').innerHTML = `<p>${data.mensaje}</p>`;
+        })
+        .catch(error => {
+            console.error('Error al aplicar cerradura opcional:', error);
+        });
+    });
+
+    // Finalmente, cargar AFNs disponibles
+    cargarAFNsDisponibles();
+    cargarAFNsParaCerradura();
 });

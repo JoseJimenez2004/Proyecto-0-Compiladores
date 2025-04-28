@@ -28,7 +28,14 @@ def crear_afn():
         afn.guardar_en_archivo(nombre_archivo)
 
         # Devolver la descripción del AFN
-        return jsonify({'afn': afn.mostrar()})
+        return jsonify({
+            'afn': {
+                'simbolo': afn.simbolo,
+                'estado_inicial': afn.estado_inicial,
+                'estado_final': afn.estado_final,
+                'transiciones': afn.transiciones
+            }
+        })
     else:
         return jsonify({'error': 'Símbolo no proporcionado'}), 400
 
@@ -170,6 +177,8 @@ def obtener_afns():
     carpeta_afns = 'autbasic'
     archivos_afns = [f.replace('.txt', '') for f in os.listdir(carpeta_afns) if f.endswith('.txt')]
     return jsonify({'afns': archivos_afns})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

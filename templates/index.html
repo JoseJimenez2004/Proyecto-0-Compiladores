@@ -53,6 +53,9 @@
                 <input type="text" id="simboloInput" class="form-control mb-3" placeholder="Introduce un símbolo">
                 <button class="btn btn-primary" id="guardarAFNBtn">Guardar AFN</button>
             </div>
+            <div id="grafo" style="width: 100%; height: 600px;"></div>
+
+
 
             <!-- Resultado AFN -->
             <div id="resultadoAFN" class="d-none mt-4">
@@ -164,5 +167,7 @@
     <!-- Bootstrap + JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/"></script>
+
 </body>
 </html>

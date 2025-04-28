@@ -1,0 +1,4 @@
+AFN con símbolo: hjj
+Estado inicial: 0
+Estado final: 1
+Transiciones: [(0, 'hjj', 1)]

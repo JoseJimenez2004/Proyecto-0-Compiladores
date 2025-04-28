@@ -100,3 +100,24 @@ class AFD:
                 self.tabla_transiciones.append(fila)
                 if fila[-1] != -1:  # Si el último valor es un token de aceptación
                     self.estados_aceptacion[fila[0]] = fila[-1]  # Almacenar el token
+
+    def leer_AFD_archivo_rangos(self, nombre_archivo):
+        """
+        Lee el AFD desde un archivo CSV y reconstruye la tabla de transiciones,
+        con soporte para rangos de caracteres.
+        """
+        with open(nombre_archivo, 'r') as archivo:
+            reader = csv.reader(archivo)
+            self.tabla_transiciones = []
+            for row in reader:
+                fila = list(map(int, row))  # Convertir la fila en una lista de enteros
+                self.tabla_transiciones.append(fila)
+                if fila[-1] != -1:  # Si el último valor es un token de aceptación
+                    self.estados_aceptacion[fila[0]] = fila[-1]  # Almacenar el token
+
+                # Procesar rangos de transiciones
+                for i, val in enumerate(fila[1:-1]):
+                    if isinstance(val, str) and '-' in val:
+                        inicio, fin = map(int, val.split('-'))
+                        for j in range(inicio, fin + 1):
+                            self.agregar_transicion(fila[0], chr(j), fila[-1])

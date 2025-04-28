@@ -1,7 +1,16 @@
 from AFN_File.AFD import AFD
 from Constantes import SimbEspecial
 from EdoAnalizador import EdoAnalizador
+from Constantes.SimbEspecial import SimbEspecial
+from Constantes import Tokenizador as Tokenizador
 
+# Diccionario para convertir caracteres a índices
+CARACTERES = {
+    'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6,
+    'h': 7, 'i': 8, 'j': 9, 'k': 10, 'l': 11, 'm': 12, 'n': 13,
+    'o': 14, 'p': 15, 'q': 16, 'r': 17, 's': 18, 't': 19, 'u': 20,
+    'v': 21, 'w': 22, 'x': 23, 'y': 24, 'z': 25
+}
 
 class AnalizadorLexico:
     def __init__(self, sigma='', archivo_afd=None):
@@ -37,9 +46,6 @@ class AnalizadorLexico:
         return True
 
     def GetEdoAnalizador(self):
-        """
-        Captura el estado actual del analizador y lo devuelve como una instancia de EdoAnalizador.
-        """
         return EdoAnalizador(
             self.CaracterActual,
             self.EdoActual,
@@ -54,9 +60,6 @@ class AnalizadorLexico:
         )
 
     def set_sigma(self, sigma):
-        """
-        Reinicia el analizador para analizar una nueva cadena de entrada.
-        """
         self.CadenaSigma = sigma
         self.PasoPorEdoAcept = False
         self.IniLexema = 0
@@ -66,25 +69,16 @@ class AnalizadorLexico:
         self.Pila.clear()
 
     def cadena_por_analizar(self):
-        """
-        Retorna la porción de la cadena que falta por analizar.
-        """
         return self.CadenaSigma[self.IndiceCaracterActual:]
 
     def yylex(self):
-        """
-        Realiza el análisis léxico, regresando el token identificado o un error.
-        """
         while True:
-            # Guardar el índice inicial del análisis
             self.Pila.append(self.IndiceCaracterActual)
 
-            # Si el índice supera la longitud de la cadena, termina
             if self.IndiceCaracterActual >= len(self.CadenaSigma):
                 self.Lexema = ""
                 return 0  # Fin de la cadena de entrada
 
-            # Inicializar el análisis de un nuevo lexema
             self.IniLexema = self.IndiceCaracterActual
             self.EdoActual = 0
             self.PasoPorEdoAcept = False
@@ -92,50 +86,98 @@ class AnalizadorLexico:
             self.token = -1
 
             while self.IndiceCaracterActual < len(self.CadenaSigma):
-                # Leer el carácter actual y buscar la transición
                 self.CaracterActual = self.CadenaSigma[self.IndiceCaracterActual]
                 ascii_val = ord(self.CaracterActual)
 
-                # Obtener la transición en la tabla del AFD
-                self.EdoTransicion = self.AutomataAFD.tabla_transiciones[self.EdoActual][ascii_val + 1]
+                # Verificar si el carácter es un símbolo válido
+                if 0 <= ascii_val < len(self.AutomataAFD.tabla_transiciones[self.EdoActual]):
+                    # Si es un carácter mapeado, obtener la transición
+                    if self.CaracterActual in CARACTERES:
+                        ascii_val = CARACTERES[self.CaracterActual]
+                    self.EdoTransicion = self.AutomataAFD.tabla_transiciones[self.EdoActual][ascii_val]
 
-                # Si hay una transición válida
-                if self.EdoTransicion != -1:
-                    self.EdoActual = self.EdoTransicion
-                    self.IndiceCaracterActual += 1
+                    if self.EdoTransicion != -1:
+                        self.EdoActual = self.EdoTransicion
+                        self.IndiceCaracterActual += 1
 
-                    # Si el estado actual es de aceptación, registrar el token
-                    if self.AutomataAFD.tabla_transiciones[self.EdoActual][-1] != -1:
-                        self.PasoPorEdoAcept = True
-                        self.token = self.AutomataAFD.tabla_transiciones[self.EdoActual][-1]
-                        self.FinLexema = self.IndiceCaracterActual - 1
-                    continue
+                        if self.AutomataAFD.tabla_transiciones[self.EdoActual][-1] != -1:
+                            self.PasoPorEdoAcept = True
+                            self.token = self.AutomataAFD.tabla_transiciones[self.EdoActual][-1]
+                            self.FinLexema = self.IndiceCaracterActual - 1
+                        continue
 
-                # Romper si no hay transición válida
                 break
 
-            # Si el último estado no fue de aceptación
             if not self.PasoPorEdoAcept:
                 self.IndiceCaracterActual = self.IniLexema + 1
                 self.Lexema = self.CadenaSigma[self.IniLexema:self.IniLexema + 1]
                 self.token = SimbEspecial.ERROR
                 return self.token
 
-            # Extraer el lexema válido
             self.Lexema = self.CadenaSigma[self.IniLexema:self.FinLexema + 1]
             self.IndiceCaracterActual = self.FinLexema + 1
 
-            # Si el token es OMITIR, reiniciar el análisis de un nuevo lexema
             if self.token == SimbEspecial.OMITIR:
                 continue
             else:
                 return self.token
 
     def undo_token(self):
-        """
-        Regresa el índice de análisis al estado anterior.
-        """
         if not self.Pila:
             return False
         self.IndiceCaracterActual = self.Pila.pop()
         return True
+
+    def pedir_cadena(self):
+        self.CadenaSigma = input("Introduce una cadena para analizar: ")
+        self.set_sigma(self.CadenaSigma)
+
+
+class AFD:
+    def __init__(self):
+        self.tabla_transiciones = []
+
+    def leer_AFD_archivo(self, archivo_afd):
+        with open(archivo_afd, 'r') as archivo:
+            lineas = archivo.readlines()
+
+        for i, linea in enumerate(lineas):
+            linea = linea.strip()
+
+            if not linea:
+                continue
+
+            if "->" in linea:
+                transicion, estado_destino = linea.split("->")
+                estado_destino = int(estado_destino.strip())
+                transicion = transicion.strip().split(",")
+                transiciones = []
+                for item in transicion:
+                    if "-" in item:
+                        inicio, fin = map(int, item.split("-"))
+                        transiciones.extend(range(inicio, fin + 1))
+                    elif item in CARACTERES:
+                        transiciones.append(CARACTERES[item])
+                    else:
+                        transiciones.append(int(item))  # Agregar los valores numéricos
+
+                self.tabla_transiciones.append((transiciones, estado_destino))
+
+            else:
+                transiciones = list(map(int, linea.split(",")))
+                self.tabla_transiciones.append(transiciones)
+
+        print(f"Tabla de transiciones cargada: {self.tabla_transiciones}")
+
+
+if __name__ == "__main__":
+    analizador = AnalizadorLexico(archivo_afd="AFN_File/mi_afd_guardado.afd")
+    analizador.pedir_cadena()
+
+    while True:
+        token = analizador.yylex()
+        if token == 0:
+            print("Análisis completado.")
+            break
+        else:
+            print(f"Token: {token}, Lexema: {analizador.Lexema}")

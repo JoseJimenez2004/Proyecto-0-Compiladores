@@ -226,75 +226,57 @@ document.getElementById("crear").addEventListener("click", () => {
       document.getElementById("modal-tokens").style.display = "none";
     }
   });
+
   function analizarCadena() {
     const cadena = document.getElementById("inputCadena").value.trim();
     const resultadoTabla = document.getElementById("tablaResultado").getElementsByTagName("tbody")[0];
-  
-    // Limpiar resultados anteriores
     resultadoTabla.innerHTML = "";
   
     const definiciones = [
-      { regex: /^([a-zA-Z])([a-zA-Z0-9])*$/, token: 10 },
-      { regex: /^[0-9]+(\.[0-9]+)?$/, token: 20 },
-      { regex: /^@+$/, token: 30 },
-      { regex: /^\($/, token: 40 },
-      { regex: /^\)$/, token: 50 },
-      { regex: /^\+$/, token: 60 },
-      { regex: /^\*$/, token: 70 },
-      { regex: /^-\&>$/, token: 80 }
+      { regex: /^([a-zA-Z])([a-zA-Z0-9])*$/, token: 10 },             // Palabra alfanumérica
+      { regex: /^[0-9]+(\.[0-9]+)?$/, token: 20 },                    // Número con o sin decimal
+      { regex: /^@+$/, token: 30 },                                   // Uno o más @
+      { regex: /^\($/, token: 40 },                                   // (
+      { regex: /^\)$/, token: 50 },                                   // )
+      { regex: /^\+$/, token: 60 },                                   // +
+      { regex: /^\*$/, token: 70 },                                   // *
+      { regex: /^-\&>$/, token: 80 },                                 // -&>
+      { regex: /^->$/, token: 80 },                                   // ->
     ];
   
     const tokens = [];
-    let buffer = "";
+    let i = 0;
   
-    const agregarToken = (lexema) => {
-      for (let def of definiciones) {
-        if (def.regex.test(lexema)) {
-          tokens.push({ lexema, token: def.token });
-          return;
+    const matchToken = (substr) => {
+      for (const def of definiciones) {
+        if (def.regex.test(substr)) {
+          return def.token;
         }
       }
-      tokens.push({ lexema, token: "DESCONOCIDO" });
+      return null;
     };
   
-    let i = 0;
     while (i < cadena.length) {
-      const char = cadena[i];
+      let encontrado = false;
   
-      // Agregar al buffer si es alfanumérico o símbolo aceptado
-      if (/[a-zA-Z0-9.@\-&>]/.test(char)) {
-        buffer += char;
+      // Probar la subcadena más larga posible desde posición i
+      for (let j = cadena.length; j > i; j--) {
+        const subcadena = cadena.substring(i, j);
+        const token = matchToken(subcadena);
   
-        // Verificar lookahead para grupos especiales (por ejemplo, -> o -&>)
-        if (buffer === "-" && cadena[i + 1] === "&" && cadena[i + 2] === ">") {
-          buffer += "&>";
-          i += 2;
-          agregarToken(buffer);
-          buffer = "";
-        } else if (buffer === "@" && cadena[i + 1] === "+") {
-          buffer += "+";
-          i += 1;
-          agregarToken(buffer);
-          buffer = "";
-        }
-  
-      } else {
-        if (buffer !== "") {
-          agregarToken(buffer);
-          buffer = "";
-        }
-  
-        // Evaluar símbolo aislado como posible token
-        if (char.trim() !== "") {
-          agregarToken(char);
+        if (token !== null) {
+          tokens.push({ lexema: subcadena, token });
+          i = j;
+          encontrado = true;
+          break;
         }
       }
   
-      i++;
-    }
-  
-    if (buffer !== "") {
-      agregarToken(buffer);
+      // Si no se encontró nada válido, agregar un solo carácter como DESCONOCIDO
+      if (!encontrado) {
+        tokens.push({ lexema: cadena[i], token: "DESCONOCIDO" });
+        i++;
+      }
     }
   
     // Mostrar resultados en tabla

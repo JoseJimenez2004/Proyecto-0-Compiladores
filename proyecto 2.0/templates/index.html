@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generador de Autómatas</title>
+  <link rel="stylesheet" href="/proyecto 2.0/static/styles/styles.css" />
+  <script type="text/javascript" src="https://unpkg.com/vis-network@9.0.0/dist/vis-network.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Generador de Autómatas</h1>
+    <label for="numAut">¿Cuántos autómatas deseas crear?</label>
+    <input type="number" id="numAut" min="1" />
+    <button id="crear">Crear Entradas</button>
+    <button id="analizar">Automáticamente</button>
+    <div id="automasGrid" class="automas-grid"></div>
+  </div>
+
+  <!-- Modal para mostrar autómata -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="graph-container" style="height: 400px;"></div>
+    </div>
+  </div>
+
+  <script src="/proyecto 2.0/static/scripts/script.js"></script>
+</body>
+</html>

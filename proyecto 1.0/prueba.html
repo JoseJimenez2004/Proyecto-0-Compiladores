@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vis.js Network Example</title>
+  <style>
+    #network {
+      width: 1000px;
+      height: 800px;
+      border: 1px solid lightgray;
+    }
+  </style>
+  <!-- Carga de la librería Vis.js desde un CDN -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network@9.0.0/dist/vis-network.min.js"></script>
+</head>
+<body>
+  <div id="network"></div>
+  <script type="text/javascript">
+    // Definición de nodos
+    var nodes = new vis.DataSet([
+      { id: 1, label: 'Node 1' },
+      { id: 2, label: 'Node 2' },
+      { id: 3, label: 'Node 3' },
+      { id: 4, label: 'Node 4' },
+      { id: 5, label: 'Node 5' },
+      { id: 6, label: 'Node 6' },
+      { id: 7, label: 'Node 7' },
+      { id: 8, label: 'Node 8' },
+      { id: 9, label: 'Node 9' },
+      { id: 10, label: 'Node 10' },
+      { id: 11, label: 'Node 11' },
+      { id: 12, label: 'Node 12' },
+      { id: 13, label: 'Node 13' },
+      { id: 14, label: 'Node 14' },
+      { id: 15, label: 'Node 15' },
+      { id: 16, label: 'Node 16' },
+      { id: 17, label: 'Node 17' },
+      { id: 18, label: 'Node 18' },
+      { id: 19, label: 'Node 19' },
+      { id: 20, label: 'Node 20' }
+    ]);
+
+    // Definición de aristas (enlaces)
+    var edges = new vis.DataSet([
+      { from: 1, to: 2 },
+      { from: 2, to: 3 },
+      { from: 3, to: 4 },
+      { from: 4, to: 5 },
+      { from: 5, to: 6 },
+      { from: 6, to: 7 },
+      { from: 7, to: 8 },
+      { from: 8, to: 9 },
+      { from: 9, to: 10 },
+      { from: 10, to: 11 },
+      { from: 11, to: 12 },
+      { from: 12, to: 13 },
+      { from: 13, to: 14 },
+      { from: 14, to: 15 },
+      { from: 15, to: 16 },
+      { from: 16, to: 17 },
+      { from: 17, to: 18 },
+      { from: 18, to: 19 },
+      { from: 19, to: 20 },
+      { from: 20, to: 1 } // Para cerrar el ciclo
+    ]);
+
+    // Obtener el contenedor donde se visualizará el grafo
+    var container = document.getElementById('network');
+
+    // Crear los datos del grafo
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+
+    // Opciones de configuración visual
+    var options = {
+      nodes: {
+        shape: 'dot',
+        size: 20
+      },
+      edges: {
+        width: 2
+      },
+      physics: {
+        enabled: true
+      }
+    };
+
+    // Inicializar el grafo
+    var network = new vis.Network(container, data, options);
+  </script>
+</body>
+</html>

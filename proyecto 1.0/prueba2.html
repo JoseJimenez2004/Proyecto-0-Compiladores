@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Léxico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .input-section, .analyze-section {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #resultado {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+        }
+
+        .lexemas-list {
+            margin-top: 20px;
+        }
+
+        .lexemas-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .lexemas-list li {
+            margin-bottom: 10px;
+        }
+
+        .lexemas-list span {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .lexemas-list button {
+            background-color: #f44336;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .lexemas-list button:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analizador Léxico</h1>
+        
+        <div class="input-section">
+            <h2>Ingrese Lexemas y Tokens</h2>
+            <label for="lexema">Lexema (expresión regular):</label>
+            <input type="text" id="lexema" placeholder="Ejemplo: ^[0-9]+(\.[0-9]+)?$">
+            
+            <label for="token">Token:</label>
+            <input type="number" id="token" placeholder="Ejemplo: 20">
+            
+            <button onclick="agregarLexema()">Agregar Lexema</button>
+        </div>
+
+        <div class="lexemas-list">
+            <h3>Lexemas Agregados</h3>
+            <ul id="lexemasDisplay"></ul>
+        </div>
+
+        <div class="analyze-section">
+            <h2>Analizar Cadena</h2>
+            <label for="cadena">Cadena a analizar:</label>
+            <input type="text" id="cadena" placeholder="Ejemplo: 2.85">
+            
+            <button onclick="analizarCadena()">Analizar</button>
+            <div id="resultado"></div>
+        </div>
+    </div>
+
+    <script>
+        // Array para almacenar lexemas y sus tokens
+        const lexemas = [];
+
+        // Función para agregar un lexema y su token
+        function agregarLexema() {
+            const lexema = document.getElementById('lexema').value;
+            const token = document.getElementById('token').value;
+
+            // Verificamos si ambos campos están llenos
+            try {
+                if (lexema && token) {
+                    lexemas.push({ lexema: new RegExp(lexema), token: token });
+                    actualizarLexemasDisplay();
+                    document.getElementById('lexema').value = '';  // Limpiar el campo de lexema
+                    document.getElementById('token').value = '';   // Limpiar el campo de token
+                } else {
+                    alert('Por favor, complete ambos campos.');
+                }
+            } catch (error) {
+                alert('Error en la expresión regular: ' + error.message);
+            }
+        }
+
+        // Función para actualizar la lista de lexemas en la interfaz
+        function actualizarLexemasDisplay() {
+            const lexemasDisplay = document.getElementById('lexemasDisplay');
+            lexemasDisplay.innerHTML = '';  // Limpiar la lista existente
+
+            // Mostrar todos los lexemas agregados
+            lexemas.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>Lexema: ${item.lexema.source} | Token: ${item.token}</span>
+                    <button onclick="eliminarLexema(${index})">Eliminar</button>
+                `;
+                lexemasDisplay.appendChild(li);
+            });
+        }
+
+        // Función para eliminar un lexema de la lista
+        function eliminarLexema(index) {
+            lexemas.splice(index, 1);
+            actualizarLexemasDisplay();  // Actualizar la lista después de eliminar
+        }
+
+        // Función para analizar la cadena y devolver los tokens correspondientes
+        function analizarCadena() {
+            const cadena = document.getElementById('cadena').value;
+            let resultado = '';
+            let encontrado = false;
+
+            // Recorrer todos los lexemas y comprobar coincidencias
+            for (const lexema of lexemas) {
+                const match = cadena.match(lexema.lexema);
+                if (match) {
+                    resultado += `Token: ${lexema.token} - Coincidencia: ${match[0]}<br>`;
+                    encontrado = true;
+                }
+            }
+
+            // Si no se encontraron coincidencias
+            if (!encontrado) {
+                resultado = 'No se encontraron coincidencias válidas para la cadena.';
+            }
+
+            document.getElementById('resultado').innerHTML = resultado;
+        }
+    </script>
+</body>
+</html>

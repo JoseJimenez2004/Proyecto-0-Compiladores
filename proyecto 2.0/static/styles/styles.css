@@ -1,156 +1,150 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f3f4f6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
     margin: 0;
     padding: 20px;
+    color: #1f2937;
   }
   
   .container {
     max-width: 960px;
     margin: auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   }
   
   input[type="number"],
   input[type="text"] {
-    padding: 8px;
-    margin: 10px 0;
+    padding: 10px 14px;
+    margin: 12px 0;
     width: 100%;
     box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    transition: border 0.3s ease;
+  }
+  
+  input[type="number"]:focus,
+  input[type="text"]:focus {
+    border-color: #3b82f6;
+    outline: none;
   }
   
   button {
-    padding: 8px 16px;
-    margin: 5px;
+    padding: 10px 20px;
+    margin: 8px 4px;
     background-color: #3b82f6;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
   }
   
   button:hover {
     background-color: #2563eb;
+    transform: translateY(-2px);
   }
   
   .automas-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
   }
   
   .cell {
     background: #ffffff;
-    border: 1px solid #d1d5db;
-    padding: 12px;
-    border-radius: 10px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease;
   }
+  
+  .cell:hover {
+    transform: scale(1.02);
+  }
+  
   .output {
     white-space: pre-wrap;
-    margin-top: 10px;
+    margin-top: 12px;
     font-size: 0.95em;
-    color: #111827;
-    background-color: #f9fafb;
-    padding: 8px;
-    border-radius: 8px;
+    color: #1f2937;
+    background-color: #f3f4f6;
+    padding: 10px;
+    border-radius: 10px;
     border: 1px solid #d1d5db;
   }
   
   .grafo {
     height: 300px;
     border: 1px solid #d1d5db;
-    border-radius: 8px;
-    margin-top: 10px;
+    border-radius: 10px;
+    margin-top: 16px;
+    background-color: #ffffff;
   }
+  
   .modal {
     display: none;
     position: fixed;
-    z-index: 10;
+    z-index: 1000;
     padding-top: 60px;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.5);
   }
   
   .modal-content {
     background-color: #fff;
     margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
+    padding: 24px;
+    border: 1px solid #ccc;
     width: 80%;
     max-width: 600px;
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   }
   
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  
-  .close:hover,
-  .close:focus {
-    color: black;
-  }
-  .resultado-tabla {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
-  }
-  
-  .resultado-tabla th,
-  .resultado-tabla td {
-    border: 1px solid #d1d5db;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  .resultado-tabla th {
-    background-color: #f3f4f6;
-  }
-  .modal {
-    display: none; /* Por defecto, oculto */
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4); /* Fondo semitransparente */
-  }
-  
-  .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    border-radius: 10px;
-  }
-  
+  .close,
   .close-tokens {
-    color: #aaa;
+    color: #9ca3af;
     float: right;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
   }
   
+  .close:hover,
+  .close:focus,
   .close-tokens:hover,
   .close-tokens:focus {
-    color: black;
-    text-decoration: none;
+    color: #111827;
   }
   
-      
+  .resultado-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .resultado-tabla th,
+  .resultado-tabla td {
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .resultado-tabla th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+  }
+  

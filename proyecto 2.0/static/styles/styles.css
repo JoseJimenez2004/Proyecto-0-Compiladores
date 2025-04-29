@@ -147,4 +147,78 @@ body {
     background-color: #f3f4f6;
     font-weight: 600;
   }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+    margin: 0;
+    padding: 20px;
+    color: #1f2937;
+  }
+  
+  .container {
+    max-width: 960px;
+    margin: auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  }
+  
+  input[type="number"],
+  input[type="text"] {
+    padding: 10px 14px;
+    margin: 12px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    transition: border 0.3s ease;
+  }
+  
+  input[type="number"]:focus,
+  input[type="text"]:focus {
+    border-color: #3b82f6;
+    outline: none;
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin: 8px 4px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+  }
+  
+  button:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+  }
+  
+  .analizador-container {
+    margin-top: 30px;
+  }
+  
+  .resultado-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .resultado-tabla th,
+  .resultado-tabla td {
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .resultado-tabla th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+  }
   

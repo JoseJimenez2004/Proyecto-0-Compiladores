@@ -34,13 +34,7 @@
       </div>
     </div>
 
-    <!-- Analizador léxico -->
-    <div class="lexer-section" style="margin-top: 40px;">
-      <h2>Analizador léxico</h2>
-      <textarea id="input-lexico" rows="4" style="width: 100%;" placeholder="Escribe aquí la cadena para analizar..."></textarea>
-      <button id="analizar-cadena" style="margin-top: 10px;">Analizar cadena</button>
-    </div>
-  </div>
+ 
 
   <!-- Modal para mostrar autómata -->
   <div id="modal" class="modal">
@@ -49,7 +43,28 @@
       <div id="graph-container" style="height: 400px;"></div>
     </div>
   </div>
+   <!-- Analizador léxico -->
+   <div class="container">
+    <h1>Analizador Léxico</h1>
 
+    <div class="analizador-container">
+      <h2>Analizar Cadena</h2>
+      <label for="inputCadena">Cadena a analizar:</label>
+      <input type="text" id="inputCadena" class="entrada-cadena" placeholder="Ingresa tu cadena..." />
+      <button onclick="analizarCadena()">Analizar Cadena</button>
+
+      <h3>Resultado del análisis:</h3>
+      <table id="tablaResultado" class="resultado-tabla" border="1">
+        <thead>
+          <tr>
+            <th>Lexema</th>
+            <th>Token</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
   <script src="/proyecto 2.0/static/scripts/script.js"></script>
 </body>
 </html>

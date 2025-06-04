@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ingrese la Gramática</title>
+  <link rel="stylesheet" href="/LL1/static/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Ingrese la Gramática</h2>
+    <div class="textarea-wrapper">
+      <pre id="highlighted"></pre>
+      <textarea id="grammarInput" spellcheck="false" placeholder="Ejemplo:
+E → T E'
+E' → + T E' | ε
+T → F T'
+T' → * F T' | ε
+F → ( E ) | id"></textarea>
+    </div>
+    <div class="button-container">
+      <button id="verifyBtn">Verificar y Siguiente</button>
+    </div>
+    <div id="mensaje"></div>
+  </div>
+
+  <script src="/LL1/static/script.js"></script>
+</body>
+</html>

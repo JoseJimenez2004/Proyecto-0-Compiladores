@@ -33,6 +33,28 @@ F → ( E ) | id"></textarea>
     </div>
   </div>
 
+
   <script src="/LL1/static/script.js"></script>
+  <script>
+  document.getElementById("tablaBtn").addEventListener("click", () => {
+    // Simula tus datos FIRST y FOLLOW obtenidos después de analizar la gramática
+    const datosTabla = [
+      { noTerminal: "E", first: ["(", "id"], follow: ["$", ")"] },
+      { noTerminal: "E'", first: ["+", "ε"], follow: ["$", ")"] },
+      { noTerminal: "T", first: ["(", "id"], follow: ["+", "$", ")"] },
+      { noTerminal: "T'", first: ["*", "ε"], follow: ["+", "$", ")"] },
+      { noTerminal: "F", first: ["(", "id"], follow: ["*", "+", "$", ")"] },
+    ];
+
+    // Abrir la nueva ventana
+    const nuevaVentana = window.open("/LL1/template/tabla.html", "_blank");
+
+    // Esperar a que la ventana cargue antes de enviar los datos
+    nuevaVentana.onload = () => {
+      nuevaVentana.postMessage(datosTabla, "*");
+    };
+  });
+</script>
+
 </body>
 </html>

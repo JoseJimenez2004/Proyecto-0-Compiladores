@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tabla FIRST y FOLLOW</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f9f9f9;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th {
+      background-color: #007acc;
+      color: white;
+      padding: 12px;
+    }
+
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    input[type="text"], textarea {
+      width: 95%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 16px;
+      resize: vertical;
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    /* Estilos para el modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 60%;
+      max-height: 70%;
+      overflow-y: auto;
+    }
+
+    .close {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .close:hover {
+      color: #000;
+    }
+
+    #cadenaInputArea {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    #cadenaInputArea h3 {
+      margin-bottom: 10px;
+    }
+
+    /* Resultado estilo */
+    #resultadoCadena {
+      margin-top: 15px;
+      font-weight: bold;
+      white-space: pre-wrap; /* conserva saltos de línea */
+      background: #eef9f1;
+      padding: 10px;
+      border-radius: 6px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+
+    /* Tabla LL(1) estilos */
+    #tablaLL1 {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    #tablaLL1 th, #tablaLL1 td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    #tablaLL1 th {
+      background-color: #007acc;
+      color: white;
+    }
+
+  </style>
+</head>
+<body>
+  <h2>Tabla FIRST y FOLLOW</h2>
+  <table id="tablaDatos">
+    <thead>
+      <tr>
+        <th>No Terminal</th>
+        <th>FIRST</th>
+        <th>FOLLOW</th>
+        <th>Token</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="button-container">
+    <button onclick="guardarTokens()">Guardar Tokens</button>
+    <button onclick="verTokens()">Ver Tokens Guardados</button>
+  </div>
+
+  <!-- Área para ingresar la cadena a procesar -->
+  <div id="cadenaInputArea">
+    <h3>Ingresa las cadenas para procesar con la gramática (una por línea)</h3>
+    <textarea id="cadenaUsuario" rows="5" placeholder="Ejemplo:
+id + id * id
+( id + id ) * id
+id * ) id"></textarea>
+    <div class="button-container">
+      <button onclick="procesarCadenas()">Procesar Cadenas Sigma</button>
+      <button onclick="verTablaLL1()">Ver Tabla LL(1)</button>
+    </div>
+    <div id="resultadoCadena"></div>
+  </div>
+
+  <!-- Modal de tokens -->
+  <div id="modalTokens" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <h3>Tokens Guardados</h3>
+      <ul id="listaTokens"></ul>
+    </div>
+  </div>
+
+  <script>
+    let datosRecibidos = [];
+    let tokensGuardados = [];
+
+    window.addEventListener("message", (event) => {
+      datosRecibidos = event.data;
+      const tbody = document.querySelector("#tablaDatos tbody");
+
+      datosRecibidos.forEach((fila) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${fila.noTerminal}</td>
+          <td>${fila.first.join(", ")}</td>
+          <td>${fila.follow.join(", ")}</td>
+          <td><input type="text" placeholder="Token para ${fila.noTerminal}" /></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+
+    function guardarTokens() {
+      const filas = document.querySelectorAll("#tablaDatos tbody tr");
+      tokensGuardados = [];
+
+      filas.forEach((fila, i) => {
+        const input = fila.querySelector("input").value.trim();
+        tokensGuardados.push({
+          noTerminal: datosRecibidos[i].noTerminal,
+          first: datosRecibidos[i].first,
+          follow: datosRecibidos[i].follow,
+          token: input || "(no asignado)"
+        });
+      });
+
+      alert("Tokens guardados correctamente.");
+    }
+
+    function verTokens() {
+      if (tokensGuardados.length === 0) {
+        alert("No hay tokens guardados aún.");
+        return;
+      }
+
+      const lista = document.getElementById("listaTokens");
+      lista.innerHTML = "";
+
+      tokensGuardados.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = `${t.noTerminal} → Token: ${t.token}`;
+        lista.appendChild(li);
+      });
+
+      document.getElementById("modalTokens").style.display = "block";
+    }
+
+    function cerrarModal() {
+      document.getElementById("modalTokens").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById("modalTokens");
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // ------------------------------
+    // Tabla LL(1 para la gramática dada
+    const tablaLL1 = {
+      "E": {
+        "id": ["T", "E'"],
+        "(": ["T", "E'"]
+      },
+      "E'": {
+        "+": ["+", "T", "E'"],
+        ")": ["ε"],
+        "$": ["ε"]
+      },
+      "T": {
+        "id": ["F", "T'"],
+        "(": ["F", "T'"]
+      },
+      "T'": {
+        "+": ["ε"],
+        "*": ["*", "F", "T'"],
+        ")": ["ε"],
+        "$": ["ε"]
+      },
+      "F": {
+        "id": ["id"],
+        "(": ["(", "E", ")"]
+      }
+    };
+
+    const simbolosTerminales = ["id", "+", "*", "(", ")", "$"];
+    const simboloInicial = "E";
+
+    // Procesa una sola cadena (string), retorna arreglo con pasos y resultados
+    function procesarCadena(cadena) {
+      const entrada = cadena.trim().split(/\s+/);
+      entrada.push("$");
+
+      let pila = ["$", simboloInicial];
+      let index = 0;
+      let pasos = [`📥 Cadena: ${cadena}`, "🔍 Análisis:"];
+      
+      while (pila.length > 0) {
+        const tope = pila.pop();
+        const simboloEntrada = entrada[index];
+
+        if (tope === simboloEntrada) {
+          pasos.push(`✔️ Se consume '${simboloEntrada}'`);
+          index++;
+        } else if (simbolosTerminales.includes(tope)) {
+          pasos.push(`❌ Error: se esperaba '${tope}' pero se encontró '${simboloEntrada}'`);
+          pasos.push("❌ Cadena no aceptada.");
+          return pasos;
+        } else {
+          const produccion = tablaLL1[tope]?.[simboloEntrada];
+          if (!produccion) {
+            pasos.push(`❌ Error: no hay regla para (${tope}, ${simboloEntrada})`);
+            pasos.push("❌ Cadena no aceptada.");
+            return pasos;
+          }
+          if (!(produccion.length === 1 && produccion[0] === "ε")) {
+            for (let i = produccion.length - 1; i >= 0; i--) {
+              pila.push(produccion[i]);
+            }
+          }
+          pasos.push(`📌 Aplica ${tope} → ${produccion.join(" ")}`);
+        }
+      }
+
+      if (index === entrada.length) {
+        pasos.push("✅ Cadena aceptada.");
+      } else {
+        pasos.push("❌ Cadena no aceptada.");
+      }
+
+      return pasos;
+    }
+
+    // Procesa múltiples cadenas y muestra resultados
+    function procesarCadenas() {
+      const area = document.getElementById("cadenaUsuario");
+      const resultado = document.getElementById("resultadoCadena");
+      const lineas = area.value.trim().split("\n").filter(l => l.trim() !== "");
+      
+      if (lineas.length === 0) {
+        alert("Por favor ingresa al menos una cadena para procesar.");
+        return;
+      }
+
+      let salida = "";
+      lineas.forEach((cadena, idx) => {
+        salida += `Cadena ${idx + 1}:\n`;
+        const pasos = procesarCadena(cadena);
+        salida += pasos.join("\n") + "\n\n";
+      });
+
+      resultado.textContent = salida;
+    }
+
+    // Muestra la tabla LL(1) completa en área resultado
+    function verTablaLL1() {
+      const resultado = document.getElementById("resultadoCadena");
+      let html = "<table id='tablaLL1'><thead><tr><th>NT / T</th>";
+
+      simbolosTerminales.forEach(t => {
+        html += `<th>${t}</th>`;
+      });
+      html += "</tr></thead><tbody>";
+
+      for (const noTerminal in tablaLL1) {
+        html += `<tr><td><b>${noTerminal}</b></td>`;
+        simbolosTerminales.forEach(t => {
+          const prod = tablaLL1[noTerminal][t];
+          html += `<td>${prod ? prod.join(" ") : ""}</td>`;
+        });
+        html += "</tr>";
+      }
+      html += "</tbody></table>";
+
+      resultado.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

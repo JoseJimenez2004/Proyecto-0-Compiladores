@@ -172,4 +172,34 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
     }
+function generarTablaLL1(data) {
+    let html = `
+        <div class="table-container">
+            <table class="ll1-table">
+                <thead>
+                    <tr>
+                        <th>Símbolos</th>
+                        ${data.terminales.map(t => `<th>${t}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    data.no_terminales.forEach(nt => {
+        html += `<tr><td><strong>${nt}</strong></td>`;
+        
+        data.terminales.forEach(t => {
+            const valor = data.tabla_ll1[nt] && data.tabla_ll1[nt][t] !== undefined ? 
+                          data.tabla_ll1[nt][t] : '-1';
+            const clase = valor !== '-1' ? 'celda-llena' : 'celda-vacia';
+            html += `<td class="${clase}">${valor}</td>`;
+        });
+        
+        html += `</tr>`;
+    });
+    
+    html += `</tbody></table></div>`;
+    return html;
+}
+
 });

@@ -1,11 +1,10 @@
-
 Gramatica -> ListaReglas;
-ListaReglas -> Reglas PC ListaReglas';
-ListaReglas' -> Reglas PC ListaReglas' |ε;
-Reglas -> LadoIzq Flecha LadoDerecho;
-LadoIzq -> SIMBOLO;
-LadosDerechos -> LadoDerecho LadosDerechos';
-LadosDerechos' -> OR LadoDerecho LadosDerechos' |ε;
+ListaReglas -> Reglas pc ListaReglasP;
+ListaReglasP -> Reglas pc ListaReglasP | epsilon;
+Reglas -> LadoIzquierdo flecha LadosDerechos;
+LadoIzquierdo -> simbolo;
+LadosDerechos -> LadoDerecho LadosDerechosP;
+LadosDerechosP -> or LadoDerecho LadosDerechosP | epsilon;
 LadoDerecho -> SecSimbolos;
-SecSimbolos -> SIMBOLO SecSimbolos';
-SecSimbolos' -> SIMBOLO SecSimbolos' |ε;
+SecSimbolos -> simbolo SecSimbolosP;
+SecSimbolosP -> simbolo SecSimbolosP | epsilon;

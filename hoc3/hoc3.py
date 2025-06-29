@@ -6,7 +6,7 @@ from functools import partial
 
 class HOCInterpreter:
     """
-    Intérprete HOC (Higher Order Calculator) que implementa:
+    Intérprete HOC (Higher Order Calcualator) que implementa:
     - Tabla de símbolos para variables
     - Funciones matemáticas
     - Evaluación de expresiones

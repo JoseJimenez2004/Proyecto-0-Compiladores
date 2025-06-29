@@ -1,0 +1,11 @@
+
+Gramatica -> ListaReglas;
+ListaReglas -> Reglas PC ListaReglas';
+ListaReglas' -> Reglas PC ListaReglas' |ε;
+Reglas -> LadoIzq Flecha LadoDerecho;
+LadoIzq -> SIMBOLO;
+LadosDerechos -> LadoDerecho LadosDerechos';
+LadosDerechos' -> OR LadoDerecho LadosDerechos' |ε;
+LadoDerecho -> SecSimbolos;
+SecSimbolos -> SIMBOLO SecSimbolos';
+SecSimbolos' -> SIMBOLO SecSimbolos' |ε;

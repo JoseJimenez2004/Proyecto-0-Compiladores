@@ -2,134 +2,67 @@ import tkinter as tk
 from tkinter import font as tkfont
 import math
 import re
-from functools import partial
 
 class HOCInterpreter:
-    """
-    Intérprete HOC (Higher Order Calcualator) que implementa:
-    - Tabla de símbolos para variables
-    - Funciones matemáticas
-    - Evaluación de expresiones
-    """
-    
     def __init__(self):
-        """Inicializa el intérprete con tablas de símbolos vacías"""
-        self.symbol_table = {}  # Almacena variables y constantes (nombre: valor)
-        self.functions = {}    # Almacena funciones (nombre: función)
-        self.init_symbols()    # Carga símbolos predefinidos
-    
+        self.symbol_table = {}
+        self.functions = {}
+        self.init_symbols()
+
     def init_symbols(self):
-        """
-        Inicializa constantes y funciones matemáticas predefinidas.
-        Se ejecuta automáticamente al crear el intérprete.
-        """
-        # Constantes matemáticas importantes
         constants = {
-            'PI': math.pi,  # π (pi)
-            'E': math.e,     # Número de Euler
-            'GAMMA': 0.5772156649015328,  # Constante de Euler-Mascheroni
-            'DEG': 180 / math.pi,  # Conversión de radianes a grados
-            'PHI': (1 + math.sqrt(5)) / 2  # Proporción áurea (φ)
+            'PI': math.pi,
+            'E': math.e,
+            'GAMMA': 0.5772156649015328,
+            'DEG': 180 / math.pi,
+            'PHI': (1 + math.sqrt(5)) / 2
         }
-        
-        # Funciones matemáticas estándar
+
         functions = {
-            # Trigonometría
             'sin': math.sin,
             'cos': math.cos,
             'tan': math.tan,
-            'asin': math.asin,
-            'acos': math.acos,
-            'atan': math.atan,
-            
-            # Logaritmos y exponenciales
             'exp': math.exp,
-            'log': math.log,     # Logaritmo natural
-            'log10': math.log10, # Logaritmo base 10
-            
-            # Otras funciones
-            'sqrt': math.sqrt,  # Raíz cuadrada
-            'abs': abs,         # Valor absoluto
-            'int': lambda x: int(x),  # Conversión a entero
-            'floor': math.floor,  # Piso
-            'ceil': math.ceil    # Techo
+            'log': math.log,
+            'log10': math.log10,
+            'sqrt': math.sqrt,
+            'abs': abs,
+            'int': lambda x: int(x),
+            'floor': math.floor,
+            'ceil': math.ceil
         }
-        
-        # Actualizar las tablas de símbolos
+
         self.symbol_table.update(constants)
         self.functions.update(functions)
-    
+
     def install(self, name, value):
-        """
-        Instala una variable o función en la tabla de símbolos.
-        
-        Args:
-            name (str): Nombre del símbolo
-            value: Valor (puede ser número o función)
-        """
-        if callable(value):  # Si es una función
+        if callable(value):
             self.functions[name] = value
-        else:  # Si es una variable
+        else:
             self.symbol_table[name] = value
-    
+
     def lookup(self, name):
-        """
-        Busca un símbolo en las tablas.
-        
-        Args:
-            name (str): Nombre del símbolo a buscar
-            
-        Returns:
-            tuple: ('VAR', valor) o ('FUNC', función) o None si no existe
-        """
         if name in self.symbol_table:
             return ('VAR', self.symbol_table[name])
         elif name in self.functions:
             return ('FUNC', self.functions[name])
         return None
-    
+
     def evaluate(self, expr):
-        """
-        Evalúa una expresión matemática.
-        Maneja asignaciones (x=5) y expresiones puras.
-        
-        Args:
-            expr (str): Expresión a evaluar
-            
-        Returns:
-            float/int: Resultado de la evaluación
-            
-        Raises:
-            ValueError: Si hay error en la expresión
-        """
         try:
-            # Manejar asignaciones (ej. x=5)
             if '=' in expr:
                 var, expr = map(str.strip, expr.split('=', 1))
                 result = self._evaluate_math(expr)
-                self.install(var, result)  # Guardar en tabla de símbolos
+                self.install(var, result)
                 return result
-            
             return self._evaluate_math(expr)
         except Exception as e:
             raise ValueError(f"Error: {str(e)}")
-    
+
     def _evaluate_math(self, expr):
-        """
-        Evalúa una expresión matemática pura (sin asignaciones).
-        Realiza sustituciones y transformaciones necesarias.
-        
-        Args:
-            expr (str): Expresión matemática
-            
-        Returns:
-            float/int: Resultado de la evaluación
-        """
-        # Reemplazar constantes por sus valores
         for name, value in self.symbol_table.items():
             expr = re.sub(rf'\b{name}\b', str(value), expr)
-        
-        # Reemplazar llamadas a funciones (ej. sin(0.5))
+
         for func_name, func in self.functions.items():
             if func_name in expr:
                 expr = re.sub(
@@ -137,365 +70,156 @@ class HOCInterpreter:
                     lambda m: str(func(float(self._evaluate_math(m.group(1))))),
                     expr
                 )
-        
-        # Reemplazar ^ con ** para operaciones de potencia
+
         expr = expr.replace('^', '**')
-        
-        # Evaluar con seguridad (restringiendo acceso)
+
         allowed_names = {**self.symbol_table, **self.functions}
         code = compile(expr, "<string>", "eval")
-        
-        # Verificar que todos los nombres usados estén permitidos
+
         for name in code.co_names:
             if name not in allowed_names:
                 raise NameError(f"Nombre '{name}' no definido")
-        
+
         return eval(code, {"__builtins__": {}}, allowed_names)
 
 class ScientificCalculator:
-    """
-    Interfaz gráfica de la calculadora científica.
-    Utiliza tkinter para la UI y HOCInterpreter para los cálculos.
-    """
-    
     def __init__(self, root):
-        """
-        Inicializa la calculadora.
-        
-        Args:
-            root: Ventana principal de tkinter
-        """
         self.root = root
         self.root.title("Calculadora Científica HOC-Python")
-        self.root.geometry("1000x700")  # Tamaño inicial
-        self.current_theme = "light"    # Tema inicial
-        self.hoc = HOCInterpreter()    # Instancia del intérprete
-        self.setup_ui()                # Configura la interfaz
-    
+        self.root.geometry("1280x800")
+        self.current_theme = "light"
+        self.hoc = HOCInterpreter()
+        self.setup_ui()
+
     def setup_ui(self):
-        """Configura todos los elementos de la interfaz gráfica."""
-        # Definición de temas (light/dark mode)
         self.themes = {
             "light": {
-                "bg": "#f0f0f0",       # Color de fondo
-                "text": "#333333",      # Color de texto
-                "button": "#e1e1e1",    # Color de botones normales
-                "highlight": "#4CAF50", # Color de botón destacado
-                "display": "white",     # Color del display
-                "special": "#2196F3",   # Color para funciones especiales
-                "constants": "#9C27B0", # Color para constantes
-                "error": "#FF5722",     # Color para botones de error/acción
-                "sidebar": "#e8e8e8",   # Color del panel lateral
-                "border": "#cccccc"     # Color de bordes
+                "bg": "#f4f6f8",
+                "text": "#202124",
+                "button": "#e0e0e0",
+                "highlight": "#1e88e5",
+                "display": "#ffffff",
+                "special": "#42a5f5",
+                "constants": "#ab47bc",
+                "error": "#ef5350",
+                "sidebar": "#fafafa",
+                "border": "#dcdcdc"
             },
             "dark": {
-                "bg": "#2d2d2d",
-                "text": "#ffffff",
-                "button": "#424242",
-                "highlight": "#8BC34A",
-                "display": "#1e1e1e",
-                "special": "#1976D2",
-                "constants": "#BA68C8",
-                "error": "#FF7043",
-                "sidebar": "#3d3d3d",
-                "border": "#555555"
+                "bg": "#263238",
+                "text": "#eceff1",
+                "button": "#37474f",
+                "highlight": "#26c6da",
+                "display": "#1c1c1c",
+                "special": "#4dd0e1",
+                "constants": "#ce93d8",
+                "error": "#ef9a9a",
+                "sidebar": "#37474f",
+                "border": "#546e7a"
             }
         }
 
-        # Frame principal (contenedor horizontal)
-        self.main_frame = tk.Frame(self.root, bg=self.themes[self.current_theme]["bg"])
-        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        theme = self.themes[self.current_theme]
+        self.main_frame = tk.Frame(self.root, bg=theme["bg"])
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=16)
 
-        # Frame para la calculadora (lado izquierdo)
-        self.calc_frame = tk.Frame(
-            self.main_frame, 
-            bg=self.themes[self.current_theme]["bg"],
-            padx=10, 
-            pady=10
-        )
-        self.calc_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.display = tk.Entry(self.main_frame, font=('Consolas', 32), bg=theme["display"],
+                                fg=theme["text"], insertbackground=theme["text"],
+                                relief=tk.FLAT, bd=8, justify='left')
+        self.display.pack(fill=tk.X, pady=(0, 20), ipady=16)
+        self.display.bind('<Return>', lambda e: self.calculate())
+        self.display.bind('<Escape>', lambda e: self.display.delete(0, tk.END))
 
-        # Frame para información (lado derecho)
-        self.sidebar_frame = tk.Frame(
-            self.main_frame, 
-            bg=self.themes[self.current_theme]["sidebar"],
-            width=300,  # Ancho fijo
-            padx=10,
-            pady=10,
-            relief=tk.RIDGE,  # Borde con relieve
-            bd=1  # Grosor del borde
-        )
-        self.sidebar_frame.pack(side=tk.RIGHT, fill=tk.Y)
-        self.sidebar_frame.pack_propagate(False)  # Mantiene el ancho fijo
+        self.button_area = tk.Frame(self.main_frame, bg=theme["bg"])
+        self.button_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Display (entrada de texto)
-        self.display = tk.Entry(
-            self.calc_frame, 
-            font=('Arial', 28),  # Fuente grande
-            bd=2, 
-            relief=tk.FLAT,  # Borde plano
-            bg=self.themes[self.current_theme]["display"],
-            fg=self.themes[self.current_theme]["text"], 
-            justify="right",  # Texto alineado a la derecha
-            insertbackground="white"  # Color del cursor
-        )
-        self.display.pack(fill=tk.X, pady=(0, 15), ipady=10)  # Padding interno vertical
-        # Bindings de teclado
-        self.display.bind('<Return>', lambda e: self.calculate())  # Enter para calcular
-        self.display.bind('<Escape>', lambda e: self.display.delete(0, tk.END))  # ESC para borrar
+        self.sidebar = tk.Frame(self.main_frame, bg=theme["sidebar"], width=340)
+        self.sidebar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.sidebar.pack_propagate(False)
 
-        # Frame para los botones
-        self.button_frame = tk.Frame(
-            self.calc_frame, 
-            bg=self.themes[self.current_theme]["bg"]
-        )
-        self.button_frame.pack(fill=tk.BOTH, expand=True)
+        self.vars_label = tk.Label(self.sidebar, text="Variables", font=('Arial', 14, 'bold'),
+                                   bg=theme["sidebar"], fg=theme["text"])
+        self.vars_label.pack(anchor="w", padx=10, pady=(10, 0))
 
-        # Crear los botones
+        self.vars_text = tk.Text(self.sidebar, height=10, font=('Consolas', 11), wrap=tk.NONE,
+                                 bg=theme["display"], fg=theme["text"], state='disabled')
+        self.vars_text.pack(fill=tk.X, padx=10, pady=5)
+
+        self.history_label = tk.Label(self.sidebar, text="Historial", font=('Arial', 14, 'bold'),
+                                      bg=theme["sidebar"], fg=theme["text"])
+        self.history_label.pack(anchor="w", padx=10, pady=(20, 0))
+
+        self.history_text = tk.Text(self.sidebar, height=15, font=('Consolas', 11), wrap=tk.NONE,
+                                    bg=theme["display"], fg=theme["text"], state='disabled')
+        self.history_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
         self.create_buttons()
-
-        # Panel de variables en el sidebar
-        self.vars_frame = tk.LabelFrame(
-            self.sidebar_frame,
-            text=" Variables ",
-            font=('Arial', 10, 'bold'),
-            bg=self.themes[self.current_theme]["sidebar"],
-            fg=self.themes[self.current_theme]["text"],
-            relief=tk.RIDGE,
-            bd=1
-        )
-        self.vars_frame.pack(fill=tk.X, pady=(0, 10))
-
-        # Área de texto para mostrar variables
-        self.vars_text = tk.Text(
-            self.vars_frame, 
-            height=8, 
-            font=('Consolas', 10),  # Fuente monoespaciada
-            bg=self.themes[self.current_theme]["display"],
-            fg=self.themes[self.current_theme]["text"], 
-            state="disabled",  # Solo lectura
-            padx=5,
-            pady=5,
-            wrap=tk.NONE  # Sin wrap de texto
-        )
-        self.vars_text.pack(fill=tk.BOTH, expand=True)
-
-        # Scrollbar para variables
-        scroll_var = tk.Scrollbar(self.vars_text)
-        scroll_var.pack(side=tk.RIGHT, fill=tk.Y)
-        self.vars_text.config(yscrollcommand=scroll_var.set)
-        scroll_var.config(command=self.vars_text.yview)
-
-        # Panel de historial
-        self.history_frame = tk.LabelFrame(
-            self.sidebar_frame,
-            text=" Historial ",
-            font=('Arial', 10, 'bold'),
-            bg=self.themes[self.current_theme]["sidebar"],
-            fg=self.themes[self.current_theme]["text"],
-            relief=tk.RIDGE,
-            bd=1
-        )
-        self.history_frame.pack(fill=tk.BOTH, expand=True)
-
-        # Área de texto para historial
-        self.history_text = tk.Text(
-            self.history_frame, 
-            height=15, 
-            font=('Consolas', 10),
-            bg=self.themes[self.current_theme]["display"],
-            fg=self.themes[self.current_theme]["text"], 
-            state="disabled",
-            padx=5,
-            pady=5,
-            wrap=tk.NONE
-        )
-        self.history_text.pack(fill=tk.BOTH, expand=True)
-
-        # Scrollbar para historial
-        scroll_hist = tk.Scrollbar(self.history_text)
-        scroll_hist.pack(side=tk.RIGHT, fill=tk.Y)
-        self.history_text.config(yscrollcommand=scroll_hist.set)
-        scroll_hist.config(command=self.history_text.yview)
-
-        # Botón para limpiar historial
-        clear_btn = tk.Button(
-            self.sidebar_frame,
-            text="Limpiar Historial",
-            command=self.clear_history,
-            bg=self.themes[self.current_theme]["error"],
-            fg="white",
-            font=('Arial', 10),
-            bd=0  # Sin borde
-        )
-        clear_btn.pack(fill=tk.X, pady=(5, 0))
-
-        # Actualizar visualización inicial
         self.update_vars_display()
 
     def create_buttons(self):
-        """Crea y organiza todos los botones de la calculadora."""
-        # Definición de grupos de botones
-        button_groups = [
-            # Grupo 1: Botones numéricos y operadores básicos
-            [
-                ('7', '8', '9', '/', 'C'),  # Fila 1
-                ('4', '5', '6', '*', '⌫'),   # Fila 2
-                ('1', '2', '3', '-', '^'),   # Fila 3
-                ('0', '.', '=', '+', '±')    # Fila 4
-            ],
-            # Grupo 2: Funciones científicas y constantes
-            [
-                ('sin', 'cos', 'tan', '(', ')'),          # Fila 1
-                ('asin', 'acos', 'atan', 'PI', 'E'),      # Fila 2
-                ('log', 'log10', 'exp', 'sqrt', 'abs'),   # Fila 3
-                ('x++', 'x--', 'int', 'DEG', 'PHI'),      # Fila 4
-                ('floor', 'ceil', 'GAMMA', 'theme', '')   # Fila 5
-            ]
+        buttons = [
+            ['7', '8', '9', '/', 'C'],
+            ['4', '5', '6', '*', '⌫'],
+            ['1', '2', '3', '-', '^'],
+            ['0', '.', '=', '+', '±'],
+            ['sin', 'cos', 'tan', '(', ')'],
+            ['log', 'log10', 'exp', 'sqrt', 'abs'],
+            ['x++', 'x--', 'int', 'DEG', 'PHI'],
+            ['floor', 'ceil', 'GAMMA', 'theme', '']
         ]
-
-        # Crear frames para los grupos de botones
-        num_frame = tk.Frame(
-            self.button_frame, 
-            bg=self.themes[self.current_theme]["bg"]
-        )
-        num_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
-
-        func_frame = tk.Frame(
-            self.button_frame, 
-            bg=self.themes[self.current_theme]["bg"]
-        )
-        func_frame.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-
-        # Configurar pesos de las columnas
-        self.button_frame.grid_columnconfigure(0, weight=3)  # Más ancho para números
-        self.button_frame.grid_columnconfigure(1, weight=2)  # Menos ancho para funciones
-        self.button_frame.grid_rowconfigure(0, weight=1)     # Solo una fila
-
-        # Crear botones numéricos
-        for row_idx, row in enumerate(button_groups[0]):
-            num_frame.grid_rowconfigure(row_idx, weight=1)
-            for col_idx, text in enumerate(row):
-                num_frame.grid_columnconfigure(col_idx, weight=1)
-                self.create_button(num_frame, text, row_idx, col_idx)
-
-        # Crear botones de funciones
-        for row_idx, row in enumerate(button_groups[1]):
-            func_frame.grid_rowconfigure(row_idx, weight=1)
-            for col_idx, text in enumerate(row):
-                if text:  # Saltar botones vacíos
-                    func_frame.grid_columnconfigure(col_idx, weight=1)
-                    self.create_button(func_frame, text, row_idx, col_idx)
+        for r, row in enumerate(buttons):
+            for c, text in enumerate(row):
+                if text:
+                    self.create_button(self.button_area, text, r, c)
 
     def create_button(self, parent, text, row, col):
-        """Crea un botón individual con estilo apropiado."""
-        # Configurar fuente según el tipo de botón
-        if text not in {'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 
-                       'log', 'log10', 'exp', 'sqrt', 'abs', 'int', 
-                       'floor', 'ceil'}:
-            btn_font = ('Arial', 14, 'bold')  # Fuente grande para números
-        else:
-            btn_font = ('Arial', 12)  # Fuente más pequeña para funciones
-            
-        # Crear el botón
-        btn = tk.Button(
-            parent, 
-            text=text, 
-            font=btn_font,
-            command=lambda t=text: self.on_button_click(t),
-            bg=self.get_button_color(text),  # Color según tipo
-            fg=self.themes[self.current_theme]["text"],
-            bd=0,  # Sin borde
-            padx=5, 
-            pady=5, 
-            relief=tk.RAISED,  # Efecto 3D
-            activebackground=self.themes[self.current_theme]["highlight"],
-            activeforeground="white"  # Color al hacer clic
-        )
-        # Posicionar el botón
-        btn.grid(
-            row=row, 
-            column=col, 
-            sticky="nsew",  # Expandir en todas direcciones
-            padx=2, 
-            pady=2,
-            ipadx=5,  # Padding interno horizontal
-            ipady=10  # Padding interno vertical
-        )
+        theme = self.themes[self.current_theme]
+        btn = tk.Button(parent, text=text, font=('Arial', 14, 'bold'), command=lambda t=text: self.on_button_click(t),
+                        bg=self.get_button_color(text), fg=theme["text"], bd=0,
+                        relief=tk.FLAT, activebackground=theme["highlight"], activeforeground="#ffffff")
+        btn.grid(row=row, column=col, sticky="nsew", padx=6, pady=6, ipadx=10, ipady=12)
+        parent.grid_rowconfigure(row, weight=1)
+        parent.grid_columnconfigure(col, weight=1)
 
     def get_button_color(self, text):
-        """
-        Devuelve el color apropiado para cada tipo de botón.
-        
-        Args:
-            text (str): Texto del botón
-            
-        Returns:
-            str: Código de color hexadecimal
-        """
         theme = self.themes[self.current_theme]
-        
-        # Botones de acción/error (C, borrar, +/-)
         if text in {'C', '⌫', '±'}:
             return theme["error"]
-        # Botones de funciones matemáticas
-        elif text in {'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 
-                     'log', 'log10', 'exp', 'sqrt', 'abs', 'int', 
-                     'floor', 'ceil'}:
+        elif text in {'sin', 'cos', 'tan', 'log', 'log10', 'exp', 'sqrt', 'abs', 'int', 'floor', 'ceil'}:
             return theme["special"]
-        # Botones de constantes
         elif text in {'PI', 'E', 'DEG', 'PHI', 'GAMMA'}:
             return theme["constants"]
-        # Botón de igual
         elif text == '=':
             return theme["highlight"]
-        # Botón de tema
         elif text == 'theme':
-            return "#607D8B"  # Color fijo para tema
-        # Botones numéricos y operadores básicos
+            return "#607D8B"
         else:
             return theme["button"]
 
     def on_button_click(self, text):
-        """
-        Maneja el evento de clic en cualquier botón.
-        
-        Args:
-            text (str): Texto del botón presionado
-        """
-        current = self.display.get()  # Contenido actual del display
-
-        # Acciones especiales
-        if text == 'C':  # Limpiar
+        current = self.display.get()
+        if text == 'C':
             self.display.delete(0, tk.END)
-        elif text == '⌫':  # Borrar último carácter
+        elif text == '⌫':
             self.display.delete(len(current) - 1, tk.END)
-        elif text == '±':  # Cambiar signo
+        elif text == '±':
             if current and current[0] == '-':
                 self.display.delete(0)
             else:
                 self.display.insert(0, '-')
-        elif text == '=':  # Calcular
+        elif text == '=':
             self.calculate()
-        elif text == 'theme':  # Cambiar tema
+        elif text == 'theme':
             self.toggle_theme()
-        elif text in {'x++', 'x--'}:  # Incremento/decremento
+        elif text in {'x++', 'x--'}:
             self.handle_increment_decrement(text)
         else:
-            # Insertar el texto del botón
             if text in self.hoc.functions or text in self.hoc.symbol_table:
-                # Si es función, agregar paréntesis
                 self.display.insert(tk.END, text + '(' if text in self.hoc.functions else text)
             else:
                 self.display.insert(tk.END, text)
 
     def handle_increment_decrement(self, op):
-        """
-        Maneja las operaciones de incremento (x++) y decremento (x--).
-        
-        Args:
-            op (str): Operación ('x++' o 'x--')
-        """
         current = self.display.get().strip()
         if current:
             try:
@@ -504,115 +228,72 @@ class ScientificCalculator:
                 new_expr = f"{current}={value}+{increment}"
                 self.display.delete(0, tk.END)
                 self.display.insert(0, new_expr)
-                self.calculate()  # Calcular inmediatamente
+                self.calculate()
             except Exception as e:
                 self.display.delete(0, tk.END)
                 self.display.insert(0, f"Error: {str(e)}")
 
     def calculate(self):
-        """Evalúa la expresión actual y muestra el resultado."""
         expr = self.display.get().strip()
-        if not expr:  # Si está vacío, no hacer nada
+        if not expr:
             return
-
         try:
-            result = self.hoc.evaluate(expr)
-            output = f"{expr} = {result}"  # Formato para historial
-            
-            # Actualizar pantalla
-            self.display.delete(0, tk.END)
-            self.display.insert(0, str(result))
-            
-            # Actualizar historial y variables
-            self.update_history(output)
-            self.update_vars_display()
+            results = []
+            for part in expr.split(';'):
+                part = part.strip()
+                if part:
+                    result = self.hoc.evaluate(part)
+                    results.append(f"{part} = {result}")
+            if results:
+                last_result = results[-1].split('=')[-1].strip()
+                self.display.delete(0, tk.END)
+                self.display.insert(0, last_result)
+                for entry in results:
+                    self.update_history(entry)
+                self.update_vars_display()
         except Exception as e:
-            # Mostrar error
             self.display.delete(0, tk.END)
             self.display.insert(0, f"Error: {str(e)}")
             self.update_history(f"Error en: {expr} => {str(e)}")
 
     def update_history(self, entry):
-        """
-        Agrega una entrada al historial.
-        
-        Args:
-            entry (str): Texto a agregar al historial
-        """
-        self.history_text.config(state="normal")  # Habilitar edición
-        self.history_text.insert(tk.END, entry + "\n")  # Agregar nueva línea
-        self.history_text.config(state="disabled")  # Deshabilitar edición
-        self.history_text.see(tk.END)  # Auto-scroll al final
-
-    def clear_history(self):
-        """Limpia todo el contenido del historial."""
         self.history_text.config(state="normal")
-        self.history_text.delete(1.0, tk.END)  # Borrar desde inicio hasta fin
+        self.history_text.insert(tk.END, entry + "\n")
         self.history_text.config(state="disabled")
+        self.history_text.see(tk.END)
 
     def update_vars_display(self):
-        """Actualiza el panel de variables con las actuales definidas."""
         self.vars_text.config(state="normal")
-        self.vars_text.delete(1.0, tk.END)  # Limpiar contenido
-        
-        # Filtrar solo variables de usuario (excluir constantes predefinidas)
-        user_vars = {k: v for k, v in self.hoc.symbol_table.items() 
-                    if k not in {'PI', 'E', 'GAMMA', 'DEG', 'PHI'}}
-        
+        self.vars_text.delete(1.0, tk.END)
+        user_vars = {k: v for k, v in self.hoc.symbol_table.items() if k not in {'PI', 'E', 'GAMMA', 'DEG', 'PHI'}}
         if user_vars:
             for var, value in user_vars.items():
                 self.vars_text.insert(tk.END, f"{var} = {value}\n")
         else:
             self.vars_text.insert(tk.END, "No hay variables definidas")
-        
         self.vars_text.config(state="disabled")
 
     def toggle_theme(self):
-        """Cambia entre tema claro y oscuro."""
         self.current_theme = "dark" if self.current_theme == "light" else "light"
         self.update_theme()
 
     def update_theme(self):
-        """Actualiza todos los elementos de la UI con el tema actual."""
         theme = self.themes[self.current_theme]
-        
-        # Actualizar frames principales
         self.main_frame.config(bg=theme["bg"])
-        self.calc_frame.config(bg=theme["bg"])
-        self.sidebar_frame.config(bg=theme["sidebar"])
-        
-        # Actualizar display
-        self.display.config(
-            bg=theme["display"], 
-            fg=theme["text"],
-            insertbackground=theme["text"]  # Color del cursor
-        )
-        
-        # Actualizar frame de botones
-        self.button_frame.config(bg=theme["bg"])
-        
-        # Actualizar panel de variables
-        self.vars_frame.config(bg=theme["sidebar"], fg=theme["text"])
+        self.button_area.config(bg=theme["bg"])
+        self.sidebar.config(bg=theme["sidebar"])
+        self.display.config(bg=theme["display"], fg=theme["text"], insertbackground=theme["text"])
+        self.vars_label.config(bg=theme["sidebar"], fg=theme["text"])
         self.vars_text.config(bg=theme["display"], fg=theme["text"])
-        
-        # Actualizar panel de historial
-        self.history_frame.config(bg=theme["sidebar"], fg=theme["text"])
+        self.history_label.config(bg=theme["sidebar"], fg=theme["text"])
         self.history_text.config(bg=theme["display"], fg=theme["text"])
-        
-        # Actualizar todos los botones
-        for frame in [self.button_frame.winfo_children()[0], 
-                     self.button_frame.winfo_children()[1]]:
-            for button in frame.winfo_children():
-                if isinstance(button, tk.Button):
-                    text = button.cget("text")
-                    button.config(
-                        bg=self.get_button_color(text),
-                        fg=theme["text"],
-                        activebackground=theme["highlight"],
-                        activeforeground="white"
-                    )
+        for widget in self.button_area.winfo_children():
+            if isinstance(widget, tk.Button):
+                text = widget.cget("text")
+                widget.config(bg=self.get_button_color(text), fg=theme["text"],
+                              activebackground=theme["highlight"], activeforeground="#ffffff")
 
 if __name__ == "__main__":
-    root = tk.Tk()  # Crear ventana principal
-    app = ScientificCalculator(root)  # Iniciar aplicación
-    root.mainloop()  # Bucle principal de la interfaz
+    root = tk.Tk()
+    app = ScientificCalculator(root)
+    root.mainloop()

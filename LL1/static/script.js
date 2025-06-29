@@ -119,8 +119,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Configurar el botón de cargar AFD
-        configurarBotonAFD(data);
+        // Configurar el botón de cargar AFD (SOLO ACTUALIZA SÍMBOLOS)
+        document.getElementById('cargarAFD').addEventListener('click', function() {
+            const afdData = data.afd;
+            
+            // Actualizar solo los símbolos, sin modificar los tokens
+            document.querySelectorAll('.tokens-table tbody tr').forEach(row => {
+                const terminal = row.querySelector('td:first-child').textContent;
+                const afdCell = row.querySelector('.afd-symbol');
+                
+                if (afdData.simbolos && afdData.simbolos[terminal]) {
+                    // Solo asignar el símbolo, sin tocar el token
+                    afdCell.textContent = afdData.simbolos[terminal];
+                }
+            });
+        });
     }
 
     function generarTablaSimbolos(data) {
@@ -153,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td>${t}</td>
                     <td><input type="text" class="token-input" placeholder="Token"></td>
-                    <td class="afd-symbol"></td>
+                    <td class="afd-symbol"></td> <!-- Inicialmente vacío -->
                     <td></td>
                 </tr>
             `;
@@ -166,29 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         return html;
-    }
-
-    function configurarBotonAFD(data) {
-        document.getElementById('cargarAFD').addEventListener('click', function() {
-            const afdData = data.afd;
-            
-            // Actualizar cada fila de la tabla
-            document.querySelectorAll('.tokens-table tbody tr').forEach(row => {
-                const terminal = row.querySelector('td:first-child').textContent;
-                const tokenInput = row.querySelector('.token-input');
-                const afdCell = row.querySelector('.afd-symbol');
-                
-                if (afdData.simbolos[terminal]) {
-                    // Asignar el símbolo correspondiente
-                    afdCell.textContent = afdData.simbolos[terminal];
-                    
-                    // Asignar el token si existe en los datos del AFD
-                    if (afdData.tokens[terminal]) {
-                        tokenInput.value = afdData.tokens[terminal];
-                    }
-                }
-            });
-        });
     }
 
     function generarListaReglas(data) {

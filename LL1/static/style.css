@@ -83,3 +83,197 @@ button:hover {
     overflow-x: auto;
     white-space: pre-wrap;
 }
+
+.procesamiento-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.ll1-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.ll1-table th, .ll1-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.ll1-table th {
+    background-color: #f2f2f2;
+}
+
+.simbolos-list {
+    margin-bottom: 1rem;
+}
+
+.simbolos-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.simbolos-list li {
+    padding: 4px 0;
+}
+
+.btn-procesar, .btn-afd {
+    background-color: #28a745;
+    margin-top: 1rem;
+}
+
+.btn-procesar:hover, .btn-afd:hover {
+    background-color: #218838;
+}
+
+.afd-table {
+    margin-top: 1rem;
+    width: 50%;
+}
+
+.afd-table th, .afd-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tabla-container {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.simbolos-list {
+    flex: 1;
+}
+
+.ll1-table {
+    flex: 2;
+}
+/* ... (conserva los estilos anteriores) ... */
+
+.procesamiento-container h2 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+.tablas-container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.tabla-ll1, .reglas-container {
+    flex: 1;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.tabla-ll1 table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-ll1 th, .tabla-ll1 td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.tabla-ll1 th {
+    background-color: #3498db;
+    color: white;
+}
+
+.tabla-ll1 tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.reglas-container ol {
+    padding-left: 1.5rem;
+}
+
+.reglas-container li {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-left: 3px solid #28a745;
+}
+/* ... (estilos anteriores) ... */
+
+/* Estilos para pestañas */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    margin-right: 5px;
+    border-radius: 5px 5px 0 0;
+}
+
+.tab-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-top: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Estilos específicos para las tablas */
+.ll1-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ll1-table th, .ll1-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.ll1-table th {
+    background-color: #3498db;
+    color: white;
+}
+
+.ll1-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Estilos para reglas */
+.reglas-list pre {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+/* Estilos para símbolos */
+.simbolos-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.simbolos-container li {
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+}

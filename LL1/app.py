@@ -38,19 +38,17 @@ def validar_gramatica(contenido):
     if errores:
         return False, "Errores encontrados:\n" + "\n".join(errores)
     return True, "Gramática válida"
+
 def analizar_gramatica(contenido):
     try:
-        # Normalizar contenido
         contenido = contenido.replace('ε', 'epsilon')
         lineas = [linea.strip() for linea in contenido.split('\n') if linea.strip()]
         
-        # Extraer símbolos y producciones
         no_terminales = OrderedDict()
         terminales = OrderedDict({'$': None})
         producciones = OrderedDict()
         reglas_numeradas = []
         
-        # Primera pasada: recolectar no terminales y producciones
         for linea in lineas:
             if '->' in linea:
                 lado_izq = linea.split('->')[0].strip()
@@ -67,22 +65,41 @@ def analizar_gramatica(contenido):
                     producciones[lado_izq].append(produccion)
                     reglas_numeradas.append(f"{lado_izq} -> {produccion}")
                     
-                    # Recolectar terminales
                     for token in produccion.split():
                         if token != 'epsilon' and not token.isupper() and token not in terminales:
                             terminales[token] = None
         
-        # Ordenar terminales
         terminales = OrderedDict({'$': None, **{t: None for t in sorted(terminales.keys()) if t != '$'}})
         
-        # Generar tabla LL(1)
+        # Mapeo de terminales a símbolos
+        simbolos_afd = {
+            'simbolo': 'a',
+            'flecha': '>',
+            'pc': ';',
+            'or': '|',
+            '$': '$'
+        }
+        
+        # Datos del AFD
+        afd_data = {
+            'simbolos': simbolos_afd,
+            'tokens': {
+                'simbolo': 10,
+                'flecha': 30,
+                'pc': 20,
+                'or': 40,
+                '$': 0
+            }
+        }
+        
+        # Generar tabla LL(1) como en la versión original
         tabla_ll1 = OrderedDict()
         for nt in no_terminales:
             tabla_ll1[nt] = OrderedDict()
             for t in terminales:
                 tabla_ll1[nt][t] = -1
         
-        # Asignaciones de ejemplo (deberías implementar el cálculo real de FIRST y FOLLOW)
+        # Asignaciones de ejemplo (como en tu versión original)
         asignaciones = {
             'Gramatica -> ListaReglas': {'simbolo': 1},
             'ListaReglas -> Reglas pc ListaReglasP': {'simbolo': 2},
@@ -99,7 +116,7 @@ def analizar_gramatica(contenido):
             'SecSimbolosP -> epsilon': {'or': 13, 'pc': 13, '$': 13}
         }
         
-        # Aplicar asignaciones
+        # Aplicar asignaciones (como en tu versión original)
         for regla, valores in asignaciones.items():
             nt = regla.split('->')[0].strip()
             for t, num in valores.items():
@@ -111,14 +128,12 @@ def analizar_gramatica(contenido):
             'terminales': list(terminales.keys()),
             'tabla_ll1': {k: dict(v) for k, v in tabla_ll1.items()},
             'reglas': [f"{i+1}. {regla}" for i, regla in enumerate(reglas_numeradas)],
-            'simbolos': {
-                'terminales': list(terminales.keys()),
-                'no_terminales': list(no_terminales.keys())
-            }
+            'afd': afd_data
         }
     except Exception as e:
         print(f"Error al analizar gramática: {str(e)}")
         raise
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -163,7 +178,7 @@ def procesar_gramatica():
         'terminales': resultado['terminales'],
         'tabla_ll1': resultado['tabla_ll1'],
         'reglas': resultado['reglas'],
-        'simbolos': resultado['simbolos']
+        'afd': resultado['afd']
     })
 
 if __name__ == '__main__':

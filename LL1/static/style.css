@@ -17,7 +17,7 @@ body {
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
     color: #2c3e50;
     margin-top: 0;
 }
@@ -29,183 +29,7 @@ h1 {
     color: #3498db;
 }
 
-/* Estilos para pestañas */
-.tabs {
-    display: flex;
-    border-bottom: 2px solid #e0e0e0;
-    margin-bottom: 20px;
-}
-
-.tab-btn {
-    padding: 12px 25px;
-    background: #f8f9fa;
-    border: none;
-    cursor: pointer;
-    margin-right: 5px;
-    border-radius: 5px 5px 0 0;
-    font-weight: 600;
-    color: #555;
-    transition: all 0.3s ease;
-}
-
-.tab-btn.active {
-    background: #3498db;
-    color: white;
-    position: relative;
-}
-
-.tab-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: #3498db;
-}
-
-.tab-content {
-    display: none;
-    padding: 20px;
-    background: white;
-    border-radius: 0 5px 5px 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* Estilos para la tabla de símbolos */
-.simbolos-section {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.no-terminales-list {
-    list-style-type: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-}
-
-.no-terminales-list li {
-    background-color: #e8f4fc;
-    padding: 10px;
-    border-radius: 5px;
-    border-left: 4px solid #3498db;
-}
-
-.tokens-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-
-.tokens-table th, .tokens-table td {
-    border: 1px solid #e0e0e0;
-    padding: 12px 15px;
-    text-align: left;
-}
-
-.tokens-table th {
-    background-color: #3498db;
-    color: white;
-    font-weight: 600;
-}
-
-.tokens-table tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-.tokens-table tr:hover {
-    background-color: #e8f4fc;
-}
-
-.token-input {
-    width: 80px;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.afd-select {
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    width: 150px;
-}
-
-.btn-cargar {
-    background-color: #f39c12;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: background-color 0.3s;
-    margin-top: 15px;
-}
-
-.btn-cargar:hover {
-    background-color: #e67e22;
-}
-
-/* Estilos para la lista de reglas */
-.reglas-list {
-    max-height: 500px;
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-.reglas-list pre {
-    margin: 0;
-    font-family: 'Consolas', 'Monaco', monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #333;
-    white-space: pre-wrap;
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-}
-
-/* Estilos para la tabla LL(1) */
-.table-container {
-    overflow-x: auto;
-}
-
-.ll1-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 600px;
-}
-
-.ll1-table th, .ll1-table td {
-    border: 1px solid #e0e0e0;
-    padding: 10px;
-    text-align: center;
-}
-
-.ll1-table th {
-    background-color: #3498db;
-    color: white;
-    font-weight: 600;
-}
-
-.ll1-table tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-.ll1-table tr:hover {
-    background-color: #e8f4fc;
-}
-
-/* Estilos para el formulario de carga */
+/* Estilos para carga de archivos */
 .upload-container {
     text-align: center;
     margin-bottom: 30px;
@@ -255,7 +79,23 @@ button:hover {
     background-color: #27ae60;
 }
 
-/* Resultados y validación */
+.btn-cargar {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.btn-cargar:hover {
+    background-color: #e67e22;
+}
+
+/* Resultados */
 #resultContainer {
     margin-top: 20px;
     background: white;
@@ -296,7 +136,154 @@ button:hover {
     display: none;
 }
 
-/* Barra de scroll personalizada */
+/* Pestañas */
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 12px 25px;
+    background: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    margin-right: 5px;
+    border-radius: 5px 5px 0 0;
+    font-weight: 600;
+    color: #555;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.tab-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    background: white;
+    border-radius: 0 5px 5px 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Tablas */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.ll1-table, .tokens-table, .syntax-step-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.ll1-table th, .ll1-table td,
+.tokens-table th, .tokens-table td,
+.syntax-step-table th, .syntax-step-table td {
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    text-align: left;
+}
+
+.ll1-table th, .tokens-table th, .syntax-step-table th {
+    background-color: #3498db;
+    color: white;
+    font-weight: 600;
+}
+
+.ll1-table tr:nth-child(even),
+.tokens-table tr:nth-child(even),
+.syntax-step-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.syntax-step-table tr.error-step {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.token-input {
+    width: 80px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.afd-symbol {
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Listas */
+.no-terminales-list {
+    list-style-type: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.no-terminales-list li {
+    background-color: #e8f4fc;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+/* Panel de análisis sintáctico */
+.sintactico-panel {
+    margin-top: 20px;
+}
+
+.gramatica-fija pre {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    border: 1px solid #e0e0e0;
+}
+
+.entrada-container textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 15px;
+}
+
+.final-result {
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 5px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.final-result.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.final-result.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+/* Barra de scroll */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -314,54 +301,4 @@ button:hover {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
-}
-/* Estilos para la tabla de símbolos */
-.tokens-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-
-.tokens-table th, .tokens-table td {
-    border: 1px solid #e0e0e0;
-    padding: 12px 15px;
-    text-align: left;
-}
-
-.tokens-table th {
-    background-color: #3498db;
-    color: white;
-    font-weight: 600;
-}
-
-.tokens-table tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-.token-input {
-    width: 80px;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.afd-symbol {
-    font-family: monospace;
-    font-weight: bold;
-}
-
-.btn-cargar {
-    background-color: #f39c12;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background-color 0.3s;
-}
-
-.btn-cargar:hover {
-    background-color: #e67e22;
 }

@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validador de Gramática LL(1)</title>
+    <title>Analizador LL(1)</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Analizador de Gramáticas LL(1)</h1>
+        <h1>Analizador Sintáctico LL(1)</h1>
         
         <div class="upload-container">
             <form id="uploadForm">
                 <input type="file" id="grammarFile" accept=".txt" required>
-                <button type="submit">Validar Gramática</button>
+                <button type="submit">Cargar Gramática</button>
             </form>
         </div>
         
         <div id="resultContainer" class="hidden">
             <h2>Resultado de Validación</h2>
-            <p id="validationResult"></p>
-            <h3>Contenido del Archivo:</h3>
+            <div id="validationResult"></div>
+            <h3>Gramática Cargada:</h3>
             <pre id="fileContent"></pre>
         </div>
     </div>

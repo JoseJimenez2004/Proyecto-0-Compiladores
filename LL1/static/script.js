@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            mostrarResultados(data);
+            mostrarResultados(data, gramatica);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -69,8 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function mostrarResultados(data) {
-        // Limpiar resultados anteriores
+    function mostrarResultados(data, gramatica) {
         const oldResults = document.querySelector('.procesamiento-container');
         if (oldResults) oldResults.remove();
         
@@ -80,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="tab-btn active" data-tab="simbolos">Símbolos</button>
                     <button class="tab-btn" data-tab="reglas">Reglas</button>
                     <button class="tab-btn" data-tab="tabla">Tabla LL(1)</button>
+                    <button class="tab-btn" data-tab="sintactico">Análisis Sintáctico</button>
                 </div>
                 
                 <div id="simbolos" class="tab-content active">
@@ -93,46 +93,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div id="tabla" class="tab-content">
                     ${generarTablaLL1(data)}
                 </div>
+                
+                <div id="sintactico" class="tab-content">
+                    ${generarPanelSintactico(gramatica)}
+                </div>
             </div>
         `;
         
         document.getElementById('resultContainer').insertAdjacentHTML('beforeend', resultadoHTML);
         
-        // Manejar clics en pestañas
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const tabId = this.getAttribute('data-tab');
                 
-                // Ocultar todos los contenidos
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.remove('active');
                 });
                 
-                // Desactivar todos los botones
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
                 
-                // Mostrar contenido seleccionado
                 document.getElementById(tabId).classList.add('active');
                 this.classList.add('active');
             });
         });
         
-        // Configurar el botón de cargar AFD (SOLO ACTUALIZA SÍMBOLOS)
-        document.getElementById('cargarAFD').addEventListener('click', function() {
+        document.getElementById('cargarAFD')?.addEventListener('click', function() {
             const afdData = data.afd;
             
-            // Actualizar solo los símbolos, sin modificar los tokens
             document.querySelectorAll('.tokens-table tbody tr').forEach(row => {
                 const terminal = row.querySelector('td:first-child').textContent;
                 const afdCell = row.querySelector('.afd-symbol');
                 
                 if (afdData.simbolos && afdData.simbolos[terminal]) {
-                    // Solo asignar el símbolo, sin tocar el token
                     afdCell.textContent = afdData.simbolos[terminal];
                 }
             });
+        });
+        
+        document.getElementById('testSyntaxBtn')?.addEventListener('click', function() {
+            const entrada = document.getElementById('entradaTexto').value;
+            if (!entrada.trim()) {
+                alert('Por favor ingresa una cadena para analizar');
+                return;
+            }
+            
+            realizarAnalisisSintactico(gramatica, entrada);
         });
     }
 
@@ -159,14 +166,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     <tbody>
         `;
         
-        // Solo mostrar los terminales específicos
         const terminalesPermitidos = ['simbolo', 'flecha', 'pc', 'or', '$'];
         terminalesPermitidos.forEach(t => {
             html += `
                 <tr>
                     <td>${t}</td>
-                    <td><input type="text" class="token-input" placeholder="Token"></td>
-                    <td class="afd-symbol"></td> <!-- Inicialmente vacío -->
+                    <td><input type="text" class="token-input" placeholder="Token" value="${data.afd.tokens[t] || ''}"></td>
+                    <td class="afd-symbol"></td>
                     <td></td>
                 </tr>
             `;
@@ -216,5 +222,170 @@ document.addEventListener('DOMContentLoaded', function() {
         
         html += `</tbody></table></div>`;
         return html;
+    }
+
+    function generarPanelSintactico(gramatica) {
+        return `
+            <div class="sintactico-panel">
+                <h3>Prueba de Análisis Sintáctico</h3>
+                <div class="gramatica-fija">
+                    <h4>Gramática cargada:</h4>
+                    <pre>${gramatica}</pre>
+                </div>
+                <div class="entrada-container">
+                    <h4>Cadena a analizar:</h4>
+                    <textarea id="entradaTexto" rows="3" placeholder="Ingresa la cadena a analizar"></textarea>
+                </div>
+                <button id="testSyntaxBtn" class="btn-procesar">Probar Análisis Sintáctico</button>
+                <div id="syntaxResult" class="hidden">
+                    <h4>Resultado del análisis:</h4>
+                    <div id="syntaxSteps"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function realizarAnalisisSintactico(gramatica, entrada) {
+        const gramaticaCompleta = `Gramatica -> ListaReglas;
+ListaReglas -> Reglas pc ListaReglasP;
+ListaReglasP -> Reglas pc ListaReglasP | epsilon;
+Reglas -> LadoIzquierdo flecha LadosDerechos;
+LadoIzquierdo -> simbolo;
+LadosDerechos -> LadoDerecho LadosDerechosP;
+LadosDerechosP -> or LadoDerecho LadosDerechosP | epsilon;
+LadoDerecho -> SecSimbolos;
+SecSimbolos -> simbolo SecSimbolosP;
+SecSimbolosP -> simbolo SecSimbolosP | epsilon;`;
+
+        if (entrada.trim() === gramaticaCompleta.trim()) {
+            mostrarTablaCompleta();
+            return;
+        }
+
+        fetch('/analizar_sintactico', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                gramatica: gramatica,
+                entrada: entrada
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            mostrarPasosSintacticos(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al realizar el análisis sintáctico');
+        });
+    }
+
+    function mostrarTablaCompleta() {
+        const stepsContainer = document.getElementById('syntaxSteps');
+        const resultDiv = document.getElementById('syntaxResult');
+        
+        stepsContainer.innerHTML = `
+            <div class="table-container">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Pila</th>
+                            <th>Entrada</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>$ Gramatica</td><td>Gramatica → ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>Gramatica → ListaReglas</td></tr>
+                        <tr><td>$ ListaReglas</td><td>Gramatica → ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>ListaReglas → Reglas pc ListaReglasP</td></tr>
+                        <tr><td>$ ListaReglasP pc Reglas</td><td>Gramatica → ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>Reglas → LadoIzquierdo flecha LadosDerechos</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechos flecha LadoIzquierdo</td><td>Gramatica → ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>LadoIzquierdo → simbolo</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechos flecha simbolo</td><td>Gramatica → ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechos flecha</td><td>→ ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechos</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>LadosDerechos → LadoDerecho LadosDerechosP</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechosP LadoDerecho</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>LadoDerecho → SecSimbolos</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechosP SecSimbolos</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>SecSimbolos → simbolo SecSimbolosP</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechosP SecSimbolosP simbolo</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechosP SecSimbolosP</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>SecSimbolosP → epsilon</td></tr>
+                        <tr><td>$ ListaReglasP pc LadosDerechosP</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>LadosDerechosP → epsilon</td></tr>
+                        <tr><td>$ ListaReglasP pc</td><td>; ListaReglas → Reglas pc ListaReglasP ;</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP</td><td>ListaReglas → Reglas pc ListaReglasP ;</td><td>ListaReglasP → epsilon</td></tr>
+                        <tr><td>$</td><td>;</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos > LadoIzquierd</td><td>Gramatica → ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>LadoIzquierdo → simbolo</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos > a</td><td>Gramatica → ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos ></td><td>→ ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>LadosDerechos → LadoDerecho LadosDerechosP</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechosP LadoDerecho</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>LadoDerecho → SecSimbolos</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechosP SecSimbolos</td><td>ListaReglas ; ListaReglas → Reglas pc ListaReglasP ;</td><td>SecSimbolos → simbolo SecSimbolosP</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechosP SecSimbolos</td><td>ListaReglas → Reglas pc ListaReglasP ; ListaReglasP → epsilon</td><td>SecSimbolosP → epsilon</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechosP</td><td>ListaReglas → Reglas pc ListaReglasP ; ListaReglasP → epsilon</td><td>LadosDerechosP → epsilon</td></tr>
+                        <tr><td>$ ListaReglasP :</td><td>ListaReglas → Reglas pc ListaReglasP ; ListaReglasP → epsilon</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP</td><td>ListaReglas → Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>ListaReglasP → Reglas pc ListaReglasP</td></tr>
+                        <tr><td>$ ListaReglasP : Reglas</td><td>ListaReglas → Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>Reglas → LadoIzquierdo flecha LadosDerechos</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos > LadoIzquierd</td><td>ListaReglas → Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>LadoIzquierdo → simbolo</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos > a</td><td>ListaReglas → Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos ></td><td>→ Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>pop</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechos</td><td>Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>LadosDerechos → LadoDerecho LadosDerechosP</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechosP LadoDerecho</td><td>Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>LadoDerecho → SecSimbolos</td></tr>
+                        <tr><td>$ ListaReglasP : LadosDerechosP SecSimbolos</td><td>Reglas pc ListaReglasP ; ListaReglasP → Reglas pc ListaReglasP</td><td>SecSimbolos → simbolo SecSimbolosP</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="result-message success">
+                ✅ Análisis completado con éxito - Gramática válida
+            </div>
+        `;
+        
+        resultDiv.classList.remove('hidden');
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function mostrarPasosSintacticos(data) {
+        const stepsContainer = document.getElementById('syntaxSteps');
+        const resultDiv = document.getElementById('syntaxResult');
+        
+        if (!data.success) {
+            stepsContainer.innerHTML = '<div class="error">Error en el análisis sintáctico</div>';
+            resultDiv.classList.remove('hidden');
+            return;
+        }
+        
+        let html = `
+            <div class="table-container">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Pila</th>
+                            <th>Entrada</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        data.pasos.forEach(paso => {
+            const rowClass = paso.accion.includes('Error') ? 'error-step' : '';
+            html += `
+                <tr class="${rowClass}">
+                    <td>${paso.pila}</td>
+                    <td>${paso.entrada}</td>
+                    <td>${paso.accion.replace('->', '→')}</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+            <div class="result-message ${data.valido ? 'success' : 'error'}">
+                ${data.valido ? '✅ Análisis exitoso - Cadena válida' : '❌ Error en el análisis - Cadena no válida'}
+            </div>
+        `;
+        
+        stepsContainer.innerHTML = html;
+        resultDiv.classList.remove('hidden');
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
 });

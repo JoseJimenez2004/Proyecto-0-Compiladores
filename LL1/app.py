@@ -71,7 +71,6 @@ def analizar_gramatica(contenido):
         
         terminales = OrderedDict({'$': None, **{t: None for t in sorted(terminales.keys()) if t != '$'}})
         
-        # Mapeo de terminales a símbolos
         simbolos_afd = {
             'simbolo': 'a',
             'flecha': '>',
@@ -80,7 +79,6 @@ def analizar_gramatica(contenido):
             '$': '$'
         }
         
-        # Datos del AFD
         afd_data = {
             'simbolos': simbolos_afd,
             'tokens': {
@@ -92,14 +90,12 @@ def analizar_gramatica(contenido):
             }
         }
         
-        # Generar tabla LL(1) como en la versión original
         tabla_ll1 = OrderedDict()
         for nt in no_terminales:
             tabla_ll1[nt] = OrderedDict()
             for t in terminales:
                 tabla_ll1[nt][t] = -1
         
-        # Asignaciones de ejemplo (como en tu versión original)
         asignaciones = {
             'Gramatica -> ListaReglas': {'simbolo': 1},
             'ListaReglas -> Reglas pc ListaReglasP': {'simbolo': 2},
@@ -116,7 +112,6 @@ def analizar_gramatica(contenido):
             'SecSimbolosP -> epsilon': {'or': 13, 'pc': 13, '$': 13}
         }
         
-        # Aplicar asignaciones (como en tu versión original)
         for regla, valores in asignaciones.items():
             nt = regla.split('->')[0].strip()
             for t, num in valores.items():
@@ -128,11 +123,84 @@ def analizar_gramatica(contenido):
             'terminales': list(terminales.keys()),
             'tabla_ll1': {k: dict(v) for k, v in tabla_ll1.items()},
             'reglas': [f"{i+1}. {regla}" for i, regla in enumerate(reglas_numeradas)],
-            'afd': afd_data
+            'afd': afd_data,
+            'producciones': producciones
         }
     except Exception as e:
         print(f"Error al analizar gramática: {str(e)}")
         raise
+
+class AnalizadorSintacticoLL1:
+    def __init__(self, gramatica):
+        self.gramatica = gramatica
+        self.tabla = gramatica['tabla_ll1']
+        self.producciones = self._convertir_producciones(gramatica['producciones'])
+        self.terminales = gramatica['terminales']
+        self.no_terminales = gramatica['no_terminales']
+        self.pasos = []
+    
+    def _convertir_producciones(self, producciones):
+        producciones_convertidas = {}
+        for nt, prods in producciones.items():
+            producciones_convertidas[nt] = []
+            for prod in prods:
+                partes = prod.split()
+                producciones_convertidas[nt].append(partes)
+        return producciones_convertidas
+    
+    def _obtener_produccion(self, no_terminal, terminal):
+        num_produccion = self.tabla.get(no_terminal, {}).get(terminal, -1)
+        if num_produccion == -1:
+            return None
+        
+        for nt, prods in self.producciones.items():
+            for i, prod in enumerate(prods, 1):
+                regla_completa = f"{nt} -> {' '.join(prod)}"
+                regla_en_gramatica = self.gramatica['reglas'][num_produccion-1].split('. ')[1]
+                if regla_completa == regla_en_gramatica:
+                    return prod
+        return None
+    
+    def analizar(self, entrada):
+        self.pasos = []
+        pila = ['$', 'Gramatica']
+        entrada_tokens = entrada.split() + ['$']
+        entrada_ptr = 0
+        
+        while len(pila) > 0:
+            tope = pila[-1]
+            actual = entrada_tokens[entrada_ptr] if entrada_ptr < len(entrada_tokens) else '$'
+            
+            registro = {
+                'pila': ' '.join(pila),
+                'entrada': ' '.join(entrada_tokens[entrada_ptr:]),
+                'accion': ''
+            }
+            
+            if tope == actual:
+                registro['accion'] = "pop"
+                pila.pop()
+                entrada_ptr += 1
+            elif tope in self.terminales:
+                registro['accion'] = f"Error: terminal inesperado {tope}"
+                self.pasos.append(registro)
+                return False
+            else:
+                produccion = self._obtener_produccion(tope, actual)
+                if produccion is None:
+                    registro['accion'] = f"Error: no hay producción para {tope} con {actual}"
+                    self.pasos.append(registro)
+                    return False
+                
+                pila.pop()
+                if produccion[0] != 'epsilon':
+                    pila.extend(reversed(produccion))
+                
+                registro['accion'] = f"{tope} → {' '.join(produccion)}"
+            
+            self.pasos.append(registro)
+        
+        return True
 
 @app.route('/')
 def index():
@@ -178,7 +246,24 @@ def procesar_gramatica():
         'terminales': resultado['terminales'],
         'tabla_ll1': resultado['tabla_ll1'],
         'reglas': resultado['reglas'],
-        'afd': resultado['afd']
+        'afd': resultado['afd'],
+        'producciones': resultado['producciones']
+    })
+
+@app.route('/analizar_sintactico', methods=['POST'])
+def analizar_sintactico():
+    data = request.json
+    gramatica_texto = data.get('gramatica', '')
+    entrada = data.get('entrada', '')
+    
+    resultado_gramatica = analizar_gramatica(gramatica_texto)
+    analizador = AnalizadorSintacticoLL1(resultado_gramatica)
+    exito = analizador.analizar(entrada)
+    
+    return jsonify({
+        'success': exito,
+        'pasos': analizador.pasos,
+        'valido': exito
     })
 
 if __name__ == '__main__':

@@ -60,9 +60,45 @@ class HOCInterpreter:
             raise ValueError(f"Error: {str(e)}")
 
     def _evaluate_math(self, expr):
+        # Primero manejar incrementos/decrementos
+        def handle_increment_decrement(match):
+            var = match.group(1)
+            operator = match.group(2)
+            
+            if var not in self.symbol_table:
+                raise NameError(f"Variable '{var}' no definida")
+            
+            if operator == '++':
+                self.symbol_table[var] += 1
+                return str(self.symbol_table[var] - 1)  # Post-increment: return original value
+            elif operator == '--':
+                self.symbol_table[var] -= 1
+                return str(self.symbol_table[var] + 1)  # Post-decrement: return original value
+
+        def handle_pre_increment_decrement(match):
+            operator = match.group(1)
+            var = match.group(2)
+            
+            if var not in self.symbol_table:
+                raise NameError(f"Variable '{var}' no definida")
+            
+            if operator == '++':
+                self.symbol_table[var] += 1
+                return str(self.symbol_table[var])  # Pre-increment: return new value
+            elif operator == '--':
+                self.symbol_table[var] -= 1
+                return str(self.symbol_table[var])  # Pre-decrement: return new value
+
+        # Procesar pre-incremento/decremento (++x, --x)
+        expr = re.sub(r'(\+\+|\-\-)(\w+)', handle_pre_increment_decrement, expr)
+        # Procesar post-incremento/decremento (x++, x--)
+        expr = re.sub(r'(\w+)(\+\+|\-\-)', handle_increment_decrement, expr)
+
+        # Sustituir constantes y variables
         for name, value in self.symbol_table.items():
             expr = re.sub(rf'\b{name}\b', str(value), expr)
 
+        # Sustituir funciones
         for func_name, func in self.functions.items():
             if func_name in expr:
                 expr = re.sub(
@@ -124,8 +160,8 @@ class ScientificCalculator:
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=16)
 
         self.display = tk.Entry(self.main_frame, font=('Consolas', 32), bg=theme["display"],
-                                fg=theme["text"], insertbackground=theme["text"],
-                                relief=tk.FLAT, bd=8, justify='left')
+                              fg=theme["text"], insertbackground=theme["text"],
+                              relief=tk.FLAT, bd=8, justify='left')
         self.display.pack(fill=tk.X, pady=(0, 20), ipady=16)
         self.display.bind('<Return>', lambda e: self.calculate())
         self.display.bind('<Escape>', lambda e: self.display.delete(0, tk.END))
@@ -138,19 +174,19 @@ class ScientificCalculator:
         self.sidebar.pack_propagate(False)
 
         self.vars_label = tk.Label(self.sidebar, text="Variables", font=('Arial', 14, 'bold'),
-                                   bg=theme["sidebar"], fg=theme["text"])
+                                 bg=theme["sidebar"], fg=theme["text"])
         self.vars_label.pack(anchor="w", padx=10, pady=(10, 0))
 
         self.vars_text = tk.Text(self.sidebar, height=10, font=('Consolas', 11), wrap=tk.NONE,
-                                 bg=theme["display"], fg=theme["text"], state='disabled')
+                               bg=theme["display"], fg=theme["text"], state='disabled')
         self.vars_text.pack(fill=tk.X, padx=10, pady=5)
 
         self.history_label = tk.Label(self.sidebar, text="Historial", font=('Arial', 14, 'bold'),
-                                      bg=theme["sidebar"], fg=theme["text"])
+                                    bg=theme["sidebar"], fg=theme["text"])
         self.history_label.pack(anchor="w", padx=10, pady=(20, 0))
 
         self.history_text = tk.Text(self.sidebar, height=15, font=('Consolas', 11), wrap=tk.NONE,
-                                    bg=theme["display"], fg=theme["text"], state='disabled')
+                                  bg=theme["display"], fg=theme["text"], state='disabled')
         self.history_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         self.create_buttons()
@@ -175,8 +211,8 @@ class ScientificCalculator:
     def create_button(self, parent, text, row, col):
         theme = self.themes[self.current_theme]
         btn = tk.Button(parent, text=text, font=('Arial', 14, 'bold'), command=lambda t=text: self.on_button_click(t),
-                        bg=self.get_button_color(text), fg=theme["text"], bd=0,
-                        relief=tk.FLAT, activebackground=theme["highlight"], activeforeground="#ffffff")
+                       bg=self.get_button_color(text), fg=theme["text"], bd=0,
+                       relief=tk.FLAT, activebackground=theme["highlight"], activeforeground="#ffffff")
         btn.grid(row=row, column=col, sticky="nsew", padx=6, pady=6, ipadx=10, ipady=12)
         parent.grid_rowconfigure(row, weight=1)
         parent.grid_columnconfigure(col, weight=1)
@@ -223,12 +259,8 @@ class ScientificCalculator:
         current = self.display.get().strip()
         if current:
             try:
-                value = self.hoc.evaluate(current)
-                increment = 1 if op == 'x++' else -1
-                new_expr = f"{current}={value}+{increment}"
-                self.display.delete(0, tk.END)
-                self.display.insert(0, new_expr)
-                self.calculate()
+                # Solo añadir el operador al final de la expresión actual
+                self.display.insert(tk.END, op.replace('x', ''))
             except Exception as e:
                 self.display.delete(0, tk.END)
                 self.display.insert(0, f"Error: {str(e)}")
@@ -291,7 +323,7 @@ class ScientificCalculator:
             if isinstance(widget, tk.Button):
                 text = widget.cget("text")
                 widget.config(bg=self.get_button_color(text), fg=theme["text"],
-                              activebackground=theme["highlight"], activeforeground="#ffffff")
+                             activebackground=theme["highlight"], activeforeground="#ffffff")
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -8,6 +8,7 @@ class HOCInterpreter:
         self.symbol_table = {}
         self.functions = {}
         self.stack = []
+        self.print_output = []  # Para almacenar los resultados de print
         self.init_symbols()
 
     def init_symbols(self):
@@ -37,38 +38,64 @@ class HOCInterpreter:
         self.functions.update(functions)
 
     def parse_and_compile(self, expr):
-        # Tokenizador básico que reconoce tokens simples, operadores y bloques {}
-        tokens = re.findall(r'[A-Za-z_][A-Za-z0-9_]*|[0-9]+(?:\.[0-9]*)?|==|!=|<=|>=|[(){};=<>+\-*/%^]', expr)
+        # Tokenizador mejorado que maneja bloques anidados
+        tokens = re.findall(r'[A-Za-z_][A-Za-z0-9_]*\+\+|'
+                          r'[A-Za-z_][A-Za-z0-9_]*|'
+                          r'[0-9]+(?:\.[0-9]*)?|'
+                          r'==|!=|<=|>=|&&|\|\||[(){};=<>+\-*/%^]|\S+', 
+                          expr.replace('\n', ' '))
         code = []
         i = 0
+        n = len(tokens)
 
         def parse_expr():
             nonlocal i
+            if i >= n:
+                return
+                
             token = tokens[i]
             if re.fullmatch(r'[0-9]+(?:\.[0-9]*)?', token):
                 code.append(('PUSH', float(token)))
+                i += 1
             elif token in self.symbol_table:
                 code.append(('LOAD', token))
+                i += 1
             elif token in self.functions:
-                i += 2  # saltar función y '('
-                parse_expr()
-                code.append(('CALL', token))
-                return
+                func = token
+                i += 1
+                if i < n and tokens[i] == '(':
+                    i += 1
+                    parse_expr()
+                    if i < n and tokens[i] == ')':
+                        i += 1
+                    code.append(('CALL', func))
+            elif token.endswith('++'):
+                var = token[:-2]
+                code.append(('LOAD', var))
+                code.append(('PUSH', 1))
+                code.append(('+',))
+                code.append(('STORE', var))
+                i += 1
             elif re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', token):
                 code.append(('LOAD', token))
-            i += 1
+                i += 1
+            elif token == '(':
+                i += 1
+                parse_expr()
+                if i < n and tokens[i] == ')':
+                    i += 1
 
         def parse_comparison():
             nonlocal i
             parse_expr()
-            if i < len(tokens):
+            if i < n:
                 op = tokens[i]
                 if op in ('>', '<', '==', '!=', '>=', '<='):
                     i += 1
                     parse_expr()
                     code.append((op.upper(),))
 
-        while i < len(tokens):
+        while i < n:
             token = tokens[i]
 
             if token == 'if':
@@ -76,28 +103,42 @@ class HOCInterpreter:
                 parse_comparison()
                 jz_index = len(code)
                 code.append(('JZ', None))
-                if tokens[i] == '{':
+                if i < n and tokens[i] == '{':
                     i += 1
-                    body = []
-                    while tokens[i] != '}':
-                        body.append(tokens[i])
+                    brace_count = 1
+                    body_tokens = []
+                    while i < n and brace_count > 0:
+                        if tokens[i] == '{':
+                            brace_count += 1
+                        elif tokens[i] == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                break
+                        body_tokens.append(tokens[i])
                         i += 1
                     i += 1
-                    body_code = self.parse_and_compile(' '.join(body))
+                    body_code = self.parse_and_compile(' '.join(body_tokens))
                     code.extend(body_code)
                 jmp_index = len(code)
                 code.append(('JMP', None))
                 code[jz_index] = ('JZ', len(code))
-                if i < len(tokens) and tokens[i] == 'else':
+                if i < n and tokens[i] == 'else':
                     i += 1
-                    if tokens[i] == '{':
+                    if i < n and tokens[i] == '{':
                         i += 1
-                        else_body = []
-                        while tokens[i] != '}':
-                            else_body.append(tokens[i])
+                        brace_count = 1
+                        else_body_tokens = []
+                        while i < n and brace_count > 0:
+                            if tokens[i] == '{':
+                                brace_count += 1
+                            elif tokens[i] == '}':
+                                brace_count -= 1
+                                if brace_count == 0:
+                                    break
+                            else_body_tokens.append(tokens[i])
                             i += 1
                         i += 1
-                        code.extend(self.parse_and_compile(' '.join(else_body)))
+                        code.extend(self.parse_and_compile(' '.join(else_body_tokens)))
                 code[jmp_index] = ('JMP', len(code))
 
             elif token == 'while':
@@ -106,14 +147,21 @@ class HOCInterpreter:
                 parse_comparison()
                 jz_index = len(code)
                 code.append(('JZ', None))
-                if tokens[i] == '{':
+                if i < n and tokens[i] == '{':
                     i += 1
-                    body = []
-                    while tokens[i] != '}':
-                        body.append(tokens[i])
+                    brace_count = 1
+                    body_tokens = []
+                    while i < n and brace_count > 0:
+                        if tokens[i] == '{':
+                            brace_count += 1
+                        elif tokens[i] == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                break
+                        body_tokens.append(tokens[i])
                         i += 1
                     i += 1
-                    code.extend(self.parse_and_compile(' '.join(body)))
+                    code.extend(self.parse_and_compile(' '.join(body_tokens)))
                 code.append(('JMP', cond_start))
                 code[jz_index] = ('JZ', len(code))
 
@@ -135,8 +183,13 @@ class HOCInterpreter:
 
     def run(self, code):
         self.stack = []
+        self.print_output = []  # Reiniciar la salida de print
         pc = 0
-        while pc < len(code):
+        max_iterations = 100000
+        iteration_count = 0
+        
+        while pc < len(code) and iteration_count < max_iterations:
+            iteration_count += 1
             instr = code[pc]
             op = instr[0]
 
@@ -150,7 +203,7 @@ class HOCInterpreter:
                 self.symbol_table[instr[1]] = self.stack.pop()
 
             elif op == 'PRINT':
-                print(">>>", self.stack[-1] if self.stack else 'Empty')
+                self.print_output.append(str(self.stack[-1] if self.stack else ''))
 
             elif op == 'JZ':
                 if not self.stack.pop():
@@ -160,6 +213,22 @@ class HOCInterpreter:
             elif op == 'JMP':
                 pc = instr[1]
                 continue
+
+            elif op == '+':
+                b, a = self.stack.pop(), self.stack.pop()
+                self.stack.append(a + b)
+
+            elif op == '-':
+                b, a = self.stack.pop(), self.stack.pop()
+                self.stack.append(a - b)
+
+            elif op == '*':
+                b, a = self.stack.pop(), self.stack.pop()
+                self.stack.append(a * b)
+
+            elif op == '/':
+                b, a = self.stack.pop(), self.stack.pop()
+                self.stack.append(a / b)
 
             elif op == '>':
                 b, a = self.stack.pop(), self.stack.pop()
@@ -191,7 +260,11 @@ class HOCInterpreter:
 
             pc += 1
 
+        if iteration_count >= max_iterations:
+            raise RuntimeError("Se excedió el límite de iteraciones (posible bucle infinito)")
+
         return self.stack[-1] if self.stack else None
+
 
 class ScientificCalculator:
     def __init__(self, root):
@@ -230,47 +303,44 @@ class ScientificCalculator:
             }
         }
 
-        # Main container
         self.main_frame = tk.Frame(self.root)
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=16)
 
-        # Display Entry
-        self.display = tk.Entry(self.main_frame, font=('Consolas', 32), relief=tk.FLAT, bd=8, justify='left')
-        self.display.pack(fill=tk.X, pady=(0, 20), ipady=16)
+        self.display = tk.Text(self.main_frame, font=('Consolas', 16), relief=tk.FLAT, bd=8, height=5)
+        self.display.pack(fill=tk.X, pady=(0, 20))
         self.display.bind('<Return>', lambda e: self.calculate())
-        self.display.bind('<Escape>', lambda e: self.display.delete(0, tk.END))
+        self.display.bind('<Escape>', lambda e: self.display.delete('1.0', tk.END))
 
-        # Buttons Frame
+        self.eval_button = tk.Button(self.main_frame, text="Evaluar", font=('Arial', 14, 'bold'),
+                                    command=self.calculate, bg=self.themes["light"]["highlight"], 
+                                    fg="white", bd=0, relief=tk.FLAT)
+        self.eval_button.pack(fill=tk.X, pady=(0, 10))
+
         self.button_area = tk.Frame(self.main_frame)
         self.button_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Sidebar for variables, pila y historial
         self.sidebar = tk.Frame(self.main_frame, width=340)
         self.sidebar.pack(side=tk.RIGHT, fill=tk.Y)
         self.sidebar.pack_propagate(False)
 
-        # Variables Label & Text
         self.vars_label = tk.Label(self.sidebar, text="Variables", font=('Arial', 14, 'bold'))
         self.vars_label.pack(anchor="w", padx=10, pady=(10, 0))
 
         self.vars_text = tk.Text(self.sidebar, height=8, font=('Consolas', 11), wrap=tk.NONE, state='disabled')
         self.vars_text.pack(fill=tk.X, padx=10, pady=5)
 
-        # Pila Label & Text
         self.stack_label = tk.Label(self.sidebar, text="Pila (stack)", font=('Arial', 14, 'bold'))
         self.stack_label.pack(anchor="w", padx=10, pady=(10, 0))
 
         self.stack_text = tk.Text(self.sidebar, height=8, font=('Consolas', 11), wrap=tk.NONE, state='disabled')
         self.stack_text.pack(fill=tk.X, padx=10, pady=5)
 
-        # Historial Label & Text
         self.history_label = tk.Label(self.sidebar, text="Historial", font=('Arial', 14, 'bold'))
         self.history_label.pack(anchor="w", padx=10, pady=(20, 0))
 
         self.history_text = tk.Text(self.sidebar, height=15, font=('Consolas', 11), wrap=tk.NONE, state='disabled')
         self.history_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
-        # Botones
         self.create_buttons()
 
     def create_buttons(self):
@@ -316,51 +386,47 @@ class ScientificCalculator:
             return theme["button"]
 
     def on_button_click(self, text):
-        current = self.display.get()
         if text == 'C':
-            self.display.delete(0, tk.END)
+            self.display.delete('1.0', tk.END)
         elif text == '⌫':
-            self.display.delete(len(current) - 1, tk.END)
+            self.display.delete('insert-1c', tk.END)
         elif text == '±':
-            if current and current[0] == '-':
-                self.display.delete(0)
-            else:
-                self.display.insert(0, '-')
+            self.display.insert(tk.END, '-')
         elif text == '=':
             self.calculate()
         elif text == 'theme':
             self.toggle_theme()
         else:
-            # Insertar funciones con paréntesis, variables sin
             if text in self.hoc.functions:
                 self.display.insert(tk.END, text + '(')
             else:
                 self.display.insert(tk.END, text)
 
     def calculate(self):
-        expr = self.display.get().strip()
+        expr = self.display.get('1.0', tk.END).strip()
         if not expr:
             return
+        
         try:
-            # Permitir múltiples instrucciones separadas por ;
-            statements = expr.split(';')
-            results = []
-            for stmt in statements:
-                if not stmt.strip():
-                    continue
-                code = self.hoc.parse_and_compile(stmt)
-                res = self.hoc.run(code)
-                results.append(f"{stmt.strip()} = {res}")
-            if results:
-                self.display.delete(0, tk.END)
-                self.display.insert(0, str(results[-1].split('=')[-1].strip()))
-                for entry in results:
-                    self.update_history(entry)
-                self.update_vars_display()
-                self.update_stack_display()
+            # Procesar todo el código como un solo bloque
+            code = self.hoc.parse_and_compile(expr)
+            final_result = self.hoc.run(code)
+            
+            # Mostrar los prints en el display
+            self.display.delete('1.0', tk.END)
+            if hasattr(self.hoc, 'print_output') and self.hoc.print_output:
+                output = "\n".join(self.hoc.print_output)
+                self.display.insert('1.0', output)
+            elif final_result is not None:
+                self.display.insert('1.0', str(final_result))
+            
+            self.update_history(expr)
+            self.update_vars_display()
+            self.update_stack_display()
+            
         except Exception as e:
-            self.display.delete(0, tk.END)
-            self.display.insert(0, f"Error: {str(e)}")
+            self.display.delete('1.0', tk.END)
+            self.display.insert('1.0', f"Error: {str(e)}")
             self.update_history(f"Error en: {expr} => {str(e)}")
 
     def update_history(self, entry):
@@ -400,6 +466,7 @@ class ScientificCalculator:
         self.main_frame.config(bg=theme["bg"])
         self.button_area.config(bg=theme["bg"])
         self.sidebar.config(bg=theme["sidebar"])
+        self.eval_button.config(bg=theme["highlight"])
 
         self.display.config(bg=theme["display"], fg=theme["text"], insertbackground=theme["text"])
 
